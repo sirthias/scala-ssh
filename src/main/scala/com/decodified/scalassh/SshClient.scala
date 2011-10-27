@@ -2,11 +2,12 @@ package com.decodified.scalassh
 
 import java.util.concurrent.TimeUnit
 import net.schmizz.sshj.SSHClient
-import java.io.File
 
-class SshClient(val endpoint: SshEndpoint, val login: SshLogin = HostFileLogin, val config: SshConfig = SshConfig()) {
-  val unconnectedClient = createClient
-  lazy val client = connect(unconnectedClient).right.flatMap(authenticate(login, _))
+class SshClient(val host: String,
+                val configProvider: HostConfigProvider = new HostFileConfig(HostFileConfig.DefaultHostFileDir)) {
+  val config = configProvider(host)
+  val unconnectedClient = config.right.map(createClient)
+  lazy val client = unconnectedClient.right.flatMap(connect).right.flatMap(authenticate)
 
   def exec(command: Command): Either[String, CommandResult] = {
     client.right.flatMap { client =>
@@ -14,7 +15,7 @@ class SshClient(val endpoint: SshEndpoint, val login: SshLogin = HostFileLogin, 
         protect("Could not execute SSH command on") {
           val channel = session.exec(command.command)
           command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
-          (command.timeout orElse config.commandTimeout) match {
+          (command.timeout orElse rightConfig.commandTimeout) match {
             case Some(timeout) => channel.join(timeout, TimeUnit.MILLISECONDS)
             case None => channel.join()
           }
@@ -24,25 +25,26 @@ class SshClient(val endpoint: SshEndpoint, val login: SshLogin = HostFileLogin, 
     }
   }
 
-  protected def createClient = make(new SSHClient(config.sshjConfig)) { client =>
-    config.connectTimeout.foreach(client.setConnectTimeout(_))
-    config.connectionTimeout.foreach(client.setTimeout(_))
-    client.addHostKeyVerifier(endpoint.hostKeyVerifier)
-    if (config.useCompression) client.useCompression()
+  protected def rightConfig = config.right.get
+
+  protected def createClient(config: HostConfig) = {
+    make(new SSHClient(config.sshjConfig)) { client =>
+      config.connectTimeout.foreach(client.setConnectTimeout(_))
+      config.connectionTimeout.foreach(client.setTimeout(_))
+      client.addHostKeyVerifier(config.hostKeyVerifier)
+      if (config.useCompression) client.useCompression()
+    }
   }
 
   protected def connect(client: SSHClient) = {
     protect("Could not connect to") {
-      client.connect(endpoint.address, endpoint.port)
+      client.connect(rightConfig.hostName, rightConfig.port)
       client
     }
   }
 
-  protected def authenticate(login: SshLogin, client: SSHClient): Either[String, SSHClient] = {
-    login match {
-      case HostFileLogin =>
-        val hostFile = new File(config.hostFilesDir + File.separator + endpoint.address.getHostName)
-        HostFileLogin.loginFor(hostFile).right.flatMap(authenticate(_, client))
+  protected def authenticate(client: SSHClient) = {
+    rightConfig.login match {
       case PasswordLogin(user, passProducer) =>
         protect("Could not authenticate (with password) to") {
           client.authPassword(user, passProducer)
@@ -73,7 +75,7 @@ class SshClient(val endpoint: SshEndpoint, val login: SshLogin = HostFileLogin, 
 
   protected def protect[T](errorMsg: => String)(f: => T) = {
     try { Right(f) } catch {
-      case e: Exception => Left("%s %s:%s due to %s".format(errorMsg, endpoint.address, endpoint.port, e))
+      case e: Exception => Left("%s %s:%s due to %s".format(errorMsg, rightConfig.hostName, rightConfig.port, e))
     }
   }
 }

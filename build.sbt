@@ -9,7 +9,8 @@ scalaVersion := "2.9.1"
 libraryDependencies ++= Seq(
 	"net.schmizz" % "sshj" % "0.6.1",
 	"org.slf4j" % "slf4j-api" % "1.6.1",
-	"org.specs2" %% "specs2" % "1.6.1" % "test"
+	"org.specs2" %% "specs2" % "1.6.1" % "test",
+	"ch.qos.logback" % "logback-classic" % "0.9.29" % "test"
 )
 
 resolvers ++= Seq(

@@ -3,7 +3,11 @@ package com.decodified.scalassh
 import java.io.{ByteArrayInputStream, InputStream}
 import net.schmizz.sshj.connection.channel.direct.Session
 
-case class Command(command: String, input: CommandInput = CommandInput.NoInput, timeout: Option[Int])
+case class Command(command: String, input: CommandInput = CommandInput.NoInput, timeout: Option[Int] = None)
+
+object Command {
+  implicit def string2Command(cmd: String) = Command(cmd)
+}
 
 case class CommandInput(inputStream: Option[InputStream])
 
