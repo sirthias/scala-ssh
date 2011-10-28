@@ -11,9 +11,13 @@ class SshClientSpec extends Specification { def is =
     "properly connect to the test host and fetch a directory listing" ! simpleTest
 
   def simpleTest = {
-    val client = new SshClient(testHostName)
-    val result = client.exec("ls")
-    result must beRight //) and (result.right.get.stdOutAsString() mustEqual "")
+    SshClient(testHostName).right.flatMap { client =>
+      client.exec("ls -a").right.map { result =>
+        val string = result.stdOutAsString() + "|" + result.stdErrAsString()
+        client.close()
+        string
+      }
+    }.right.get must startWith(".\n..\n")
   }
 
   def testHostName = {

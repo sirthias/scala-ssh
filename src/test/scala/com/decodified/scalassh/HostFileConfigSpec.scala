@@ -1,7 +1,6 @@
 package com.decodified.scalassh
 
 import org.specs2.Specification
-import java.io.File
 
 class HostFileConfigSpec extends Specification { def is =
 
@@ -16,7 +15,7 @@ class HostFileConfigSpec extends Specification { def is =
       config("enc-keyfile.com") mustEqual Right(HostConfig(PublicKeyLogin("alice", "superSecure", "/some/file" :: Nil), "enc-keyfile.com"))
     } ^
     "error message if the file is missing" ! {
-      config("non-existing.com").left.get must contain("not found, either provide one or use")
+      config("non-existing.com").left.get mustEqual "Host resource 'non-existing.com' not found"
     } ^
     "error message if the login-type is invalid" ! {
       config("invalid-login-type.com").left.get must startingWith("Illegal login-type setting 'fancy pants'")
@@ -28,7 +27,5 @@ class HostFileConfigSpec extends Specification { def is =
       config("illegal-line.com").left.get must endWith("contains illegal line:\nthis line triggers an error!")
     }
 
-  lazy val config = new HostFileConfig(
-    new File(getClass.getClassLoader.getResource("keyfile.com").toURI).getParentFile.getAbsolutePath
-  )
+  val config = HostResourceConfig()
 }

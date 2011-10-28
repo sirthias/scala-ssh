@@ -2,20 +2,23 @@ package com.decodified.scalassh
 
 import java.util.concurrent.TimeUnit
 import net.schmizz.sshj.SSHClient
+import java.io.File
+import org.slf4j.LoggerFactory
 
-class SshClient(val host: String,
-                val configProvider: HostConfigProvider = new HostFileConfig(HostFileConfig.DefaultHostFileDir)) {
-  val config = configProvider(host)
-  val unconnectedClient = config.right.map(createClient)
-  lazy val client = unconnectedClient.right.flatMap(connect).right.flatMap(authenticate)
+class SshClient(val config: HostConfig) {
+  lazy val log = LoggerFactory.getLogger(getClass)
+  lazy val endpoint = config.hostName + ':' + config.port
+  lazy val authenticatedClient = connect(client).right.flatMap(authenticate)
+  val client = createClient(config)
 
   def exec(command: Command): Either[String, CommandResult] = {
-    client.right.flatMap { client =>
+    authenticatedClient.right.flatMap { client =>
       startSession(client).right.flatMap { session =>
+        log.info("Executing SSH command on {}: \"{}\"", endpoint, command.command)
         protect("Could not execute SSH command on") {
           val channel = session.exec(command.command)
           command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
-          (command.timeout orElse rightConfig.commandTimeout) match {
+          (command.timeout orElse config.commandTimeout) match {
             case Some(timeout) => channel.join(timeout, TimeUnit.MILLISECONDS)
             case None => channel.join()
           }
@@ -24,8 +27,6 @@ class SshClient(val host: String,
       }
     }
   }
-
-  protected def rightConfig = config.right.get
 
   protected def createClient(config: HostConfig) = {
     make(new SSHClient(config.sshjConfig)) { client =>
@@ -37,14 +38,18 @@ class SshClient(val host: String,
   }
 
   protected def connect(client: SSHClient) = {
+    require(!client.isConnected)
     protect("Could not connect to") {
-      client.connect(rightConfig.hostName, rightConfig.port)
+      log.info("Connecting to {} ...", endpoint)
+      client.connect(config.hostName, config.port)
       client
     }
   }
 
   protected def authenticate(client: SSHClient) = {
-    rightConfig.login match {
+    require(client.isConnected && !client.isAuthenticated)
+    log.info("Authenticating to {} using {} ...", endpoint, config.login)
+    config.login match {
       case PasswordLogin(user, passProducer) =>
         protect("Could not authenticate (with password) to") {
           client.authPassword(user, passProducer)
@@ -52,7 +57,7 @@ class SshClient(val host: String,
         }
       case PublicKeyLogin(user, None, keyfileLocations) =>
         protect("Could not authenticate (with keyfile) to") {
-          client.authPublickey(user, keyfileLocations: _*)
+          client.authPublickey(user, keyfileLocations.filter(new File(_).exists): _*)
           client
         }
       case PublicKeyLogin(user, Some(passProducer), keyfileLocations) =>
@@ -64,18 +69,25 @@ class SshClient(val host: String,
   }
 
   protected def startSession(client: SSHClient) = {
+    require(client.isConnected && client.isAuthenticated)
     protect("Could not start SSH session on") {
       client.startSession()
     }
   }
 
   def close() {
-    client.right.foreach(_.close())
+    log.info("Closing connection to {} ...", endpoint)
+    client.close()
   }
 
   protected def protect[T](errorMsg: => String)(f: => T) = {
-    try { Right(f) } catch {
-      case e: Exception => Left("%s %s:%s due to %s".format(errorMsg, rightConfig.hostName, rightConfig.port, e))
-    }
+    try { Right(f) }
+    catch { case e: Exception => Left("%s %s due to %s".format(errorMsg, endpoint, e)) }
+  }
+}
+
+object SshClient {
+  def apply(host: String, configProvider: HostConfigProvider = HostFileConfig()) = {
+    configProvider(host).right.map(new SshClient(_))
   }
 }

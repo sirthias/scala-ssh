@@ -23,7 +23,7 @@ class CommandResult(val channel: Session.Command) {
   lazy val stdErrBytes = new StreamCopier().emptyToByteArray(stdErrStream)
   lazy val stdOutBytes = new StreamCopier().emptyToByteArray(stdOutStream)
   def stdErrAsString(charsetname: String = "utf8") = new String(stdErrBytes, charsetname)
-  def stdOutAsString(charsetname: String = "utf8") = new String(stdErrBytes, charsetname)
+  def stdOutAsString(charsetname: String = "utf8") = new String(stdOutBytes, charsetname)
   lazy val exitSignal: Option[String] = Option(channel.getExitSignal).map(_.toString)
   lazy val exitCode: Option[Int] = Option(channel.getExitStatus)
   lazy val exitErrorMessage: Option[String] = Option(channel.getExitErrorMessage)
