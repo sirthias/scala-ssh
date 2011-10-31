@@ -1,7 +1,7 @@
 package com.decodified.scalassh
 
-import java.io.{ByteArrayInputStream, InputStream}
 import net.schmizz.sshj.connection.channel.direct.Session
+import java.io.{FileInputStream, File, ByteArrayInputStream, InputStream}
 
 case class Command(command: String, input: CommandInput = CommandInput.NoInput, timeout: Option[Int] = None)
 
@@ -15,6 +15,10 @@ object CommandInput {
   lazy val NoInput = CommandInput(None)
   implicit def apply(input: String, charsetName: String = "UTF8"): CommandInput = apply(input.getBytes(charsetName))
   implicit def apply(input: Array[Byte]): CommandInput = apply(Some(new ByteArrayInputStream(input)))
+  implicit def apply(input: InputStream): CommandInput = apply(Some(input))
+  def fromFile(file: String): CommandInput = fromFile(new File(file))
+  def fromFile(file: File): CommandInput = new FileInputStream(file)
+  def fromResource(resource: String): CommandInput = getClass.getClassLoader.getResourceAsStream(resource)
 }
 
 class CommandResult(val channel: Session.Command) {
