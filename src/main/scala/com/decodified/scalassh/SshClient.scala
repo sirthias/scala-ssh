@@ -11,7 +11,7 @@ class SshClient(val config: HostConfig) {
   lazy val authenticatedClient = connect(client).right.flatMap(authenticate)
   val client = createClient(config)
 
-  def exec(command: Command): Either[String, CommandResult] = {
+  def exec(command: Command): Validated[CommandResult] = {
     authenticatedClient.right.flatMap { client =>
       startSession(client).right.flatMap { session =>
         log.info("Executing SSH command on {}: \"{}\"", endpoint, command.command)
@@ -87,7 +87,7 @@ class SshClient(val config: HostConfig) {
 }
 
 object SshClient {
-  def apply(host: String, configProvider: HostConfigProvider = HostFileConfig()) = {
+  def apply(host: String, configProvider: HostConfigProvider = HostFileConfig()): Validated[SshClient] = {
     configProvider(host).right.map(new SshClient(_))
   }
 }

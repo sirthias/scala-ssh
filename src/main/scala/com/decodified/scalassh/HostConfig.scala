@@ -8,7 +8,7 @@ import net.schmizz.sshj.transport.verification.HostKeyVerifier
 import java.security.PublicKey
 import net.schmizz.sshj.common.SecurityUtils
 
-trait HostConfigProvider extends (String => Either[String, HostConfig])
+trait HostConfigProvider extends (String => Validated[HostConfig])
 
 object HostConfigProvider {
   implicit def login2HostConfigProvider(login: SshLogin) = new HostConfigProvider {
@@ -36,7 +36,7 @@ object HostConfig {
 }
 
 abstract class FromStringsHostConfigProvider extends HostConfigProvider {
-  def rawLines(host: String): Either[String, (String, TraversableOnce[String])]
+  def rawLines(host: String): Validated[(String, TraversableOnce[String])]
 
   def apply(host: String) = {
     rawLines(host).right.flatMap { case (source, lines) =>
@@ -117,7 +117,7 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
   }
 
   private def splitToMap(lines: TraversableOnce[String], source: String) = {
-    ((Right(Map.empty): Either[String, Map[String, String]]) /: lines) {
+    ((Right(Map.empty): Validated[Map[String, String]]) /: lines) {
       case (Right(map), line) if line.nonEmpty && line.charAt(0) != '#' =>
         line.indexOf('=') match {
           case -1 => Left("Host config '%s' contains illegal line:\n%s".format(source, line))

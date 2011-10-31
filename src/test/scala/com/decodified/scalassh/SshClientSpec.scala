@@ -11,7 +11,7 @@ class SshClientSpec extends Specification { def is =
     "properly connect to the test host and fetch a directory listing" ! simpleTest
 
   def simpleTest = {
-    SshClient(testHostName).right.flatMap { client =>
+    SSH(testHostName) { client =>
       client.exec("ls -a").right.map { result =>
         val string = result.stdOutAsString() + "|" + result.stdErrAsString()
         client.close()
