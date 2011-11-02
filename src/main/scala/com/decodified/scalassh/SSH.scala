@@ -1,31 +1,25 @@
 package com.decodified.scalassh
 
 object SSH {
-  def apply[T, R](host: String, configProvider: HostConfigProvider = HostFileConfig())
-                 (body: SshClient => T)(implicit wrapper: ResultWrapper[T, R]): Validated[R] = {
+  def apply[T](host: String, configProvider: HostConfigProvider = HostFileConfig())
+              (body: SshClient => Result[T]): Validated[T] = {
     SshClient(host, configProvider).right.flatMap { client =>
       val result = {
-        try { wrapper(body(client)) }
+        try { body(client).result }
         catch { case e: Exception => Left(e.toString) }
       }
       client.close()
       result
     }
   }
-}
 
-abstract class ResultWrapper[T, R] extends (T => Validated[R])
+  case class Result[T](result: Validated[T])
 
-object ResultWrapper extends Implicits
-
-private[scalassh] class Implicits {
-  implicit def eitherWrapper[T, R](implicit ev: T <:< Validated[R]) = new ResultWrapper[T, R] {
-    def apply(value: T) = value
+  object Result extends LowerPriorityImplicits {
+    implicit def validated2Result[T](value: Validated[T]) = Result(value)
+  }
+  private[SSH] abstract class LowerPriorityImplicits {
+    implicit def any2Result[T](value: T) = Result(Right(value))
   }
 }
 
-private[scalassh] class LowerPriorityImplicits {
-  implicit def wrapper[T] = new ResultWrapper[T, T] {
-    def apply(value: T) = Right(value)
-  }
-}
