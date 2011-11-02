@@ -18,6 +18,10 @@ final class StreamCopier(bufferSize: Int = 4096) {
     }
   }
 
+  def emptyToString(inputStream: InputStream, charset: String = "UTF8") = {
+    new String(emptyToByteArray(inputStream), charset)
+  }
+
   def emptyToByteArray(inputStream: InputStream) = {
     val output = new ByteArrayOutputStream()
     copy(inputStream, output)
