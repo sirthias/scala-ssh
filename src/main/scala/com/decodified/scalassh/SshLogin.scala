@@ -2,7 +2,9 @@ package com.decodified.scalassh
 
 import java.io.File
 
-sealed trait SshLogin
+sealed trait SshLogin {
+  def user: String
+}
 
 case class PasswordLogin(user: String, passProducer: PasswordProducer) extends SshLogin
 
