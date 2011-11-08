@@ -4,9 +4,9 @@ import net.schmizz.sshj.{DefaultConfig, Config}
 import io.Source
 import java.io.{IOException, File}
 import HostKeyVerifiers._
-import net.schmizz.sshj.transport.verification.HostKeyVerifier
 import java.security.PublicKey
 import net.schmizz.sshj.common.SecurityUtils
+import net.schmizz.sshj.transport.verification.{OpenSSHKnownHosts, HostKeyVerifier}
 
 trait HostConfigProvider extends (String => Validated[HostConfig])
 
@@ -27,7 +27,7 @@ case class HostConfig(
   connectionTimeout: Option[Int] = None,
   commandTimeout: Option[Int] = None,
   useCompression: Boolean = false,
-  hostKeyVerifier: HostKeyVerifier = DontVerify,
+  hostKeyVerifier: HostKeyVerifier = KnownHosts.right.toOption.getOrElse(DontVerify),
   sshjConfig: Config = HostConfig.DefaultSshjConfig
 )
 
@@ -46,7 +46,8 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
     optIntSetting("connect-timeout", settings, source).right.flatMap { connectTimeout =>
     optIntSetting("connection-timeout", settings, source).right.flatMap { connectionTimeout =>
     optIntSetting("command-timeout", settings, source).right.flatMap { commandTimeout =>
-    optBoolSetting("use-compression", settings, source).right.map { useCompression =>
+    optBoolSetting("use-compression", settings, source).right.flatMap { useCompression =>
+    setting("fingerprint", settings, source).right.map(forFingerprint).left.flatMap(_ => KnownHosts).right.map { verifier =>
     HostConfig(
       login,
       hostName = setting("host-name", settings, source).right.toOption.getOrElse(host),
@@ -55,8 +56,8 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
       connectionTimeout = connectionTimeout,
       commandTimeout = commandTimeout,
       useCompression = useCompression.getOrElse(false),
-      hostKeyVerifier = setting("fingerprint", settings, source).right.toOption.map(forFingerprint).getOrElse(DontVerify)
-    )}}}}}}}}
+      hostKeyVerifier = verifier
+    )}}}}}}}}}
   }
 
   private def login(settings: Map[String, String], source: String) = {
@@ -169,6 +170,18 @@ object HostResourceConfig {
 object HostKeyVerifiers {
   lazy val DontVerify = new HostKeyVerifier {
     def verify(hostname: String, port: Int, key: PublicKey) = true
+  }
+  lazy val KnownHosts = {
+    val sshDir = System.getProperty("user.home") + File.separator + ".ssh" + File.separator
+    fromKnownHostsFile(new File(sshDir + "known_hosts")).left.flatMap { error1 =>
+      fromKnownHostsFile(new File(sshDir + "known_hosts2")).left.map(error1 + " and " + _)
+    }
+  }
+  def fromKnownHostsFile(knownHostsFile: File): Validated[HostKeyVerifier] = {
+    if (knownHostsFile.exists()) {
+      try { Right(new OpenSSHKnownHosts(knownHostsFile)) }
+      catch { case e: Exception => Left("Could not read %s due to %s".format(knownHostsFile, e)) }
+    } else Left(knownHostsFile.toString + " not found")
   }
   def forFingerprint(fingerprint: String) = new HostKeyVerifier {
     def verify(hostname: String, port: Int, key: PublicKey) = SecurityUtils.getFingerprint(key) == fingerprint
