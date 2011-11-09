@@ -33,7 +33,7 @@ class SshClient(val config: HostConfig) {
       config.connectTimeout.foreach(client.setConnectTimeout(_))
       config.connectionTimeout.foreach(client.setTimeout(_))
       client.addHostKeyVerifier(config.hostKeyVerifier)
-      if (config.useCompression) client.useCompression()
+      if (config.enableCompression) client.useCompression()
     }
   }
 

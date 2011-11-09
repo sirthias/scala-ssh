@@ -6,7 +6,7 @@ class HostFileConfigSpec extends Specification { def is =
 
   "Depending on the host file the HostFileConfig should produce a proper" ^
     "PasswordLogin" ! {
-      config("password.com") mustEqual Right(HostConfig(PasswordLogin("bob", "123"), "password.com", useCompression = true))
+      config("password.com") mustEqual Right(HostConfig(PasswordLogin("bob", "123"), "password.com", enableCompression = true))
     } ^
     "unencrypted PublicKeyLogin" ! {
       config("keyfile.com") mustEqual Right(HostConfig(PublicKeyLogin("alice", "/some/file"), "xyz.special.com", port = 30))

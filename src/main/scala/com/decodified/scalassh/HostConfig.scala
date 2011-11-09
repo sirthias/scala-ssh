@@ -26,7 +26,7 @@ case class HostConfig(
   connectTimeout: Option[Int] = None,
   connectionTimeout: Option[Int] = None,
   commandTimeout: Option[Int] = None,
-  useCompression: Boolean = false,
+  enableCompression: Boolean = false,
   hostKeyVerifier: HostKeyVerifier = KnownHosts.right.toOption.getOrElse(DontVerify),
   sshjConfig: Config = HostConfig.DefaultSshjConfig
 )
@@ -46,7 +46,7 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
     optIntSetting("connect-timeout", settings, source).right.flatMap { connectTimeout =>
     optIntSetting("connection-timeout", settings, source).right.flatMap { connectionTimeout =>
     optIntSetting("command-timeout", settings, source).right.flatMap { commandTimeout =>
-    optBoolSetting("use-compression", settings, source).right.flatMap { useCompression =>
+    optBoolSetting("enable-compression", settings, source).right.flatMap { enableCompression =>
     setting("fingerprint", settings, source).right.map(forFingerprint).left.flatMap(_ => KnownHosts).right.map { verifier =>
     HostConfig(
       login,
@@ -55,7 +55,7 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
       connectTimeout = connectTimeout,
       connectionTimeout = connectionTimeout,
       commandTimeout = commandTimeout,
-      useCompression = useCompression.getOrElse(false),
+      enableCompression = enableCompression.getOrElse(false),
       hostKeyVerifier = verifier
     )}}}}}}}}}
   }

@@ -2,4 +2,4 @@
 login-type = password
 username = bob
 password = 123
-use-compression = yes
+enable-compression = yes
