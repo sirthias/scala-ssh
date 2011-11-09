@@ -125,3 +125,4 @@ _scala-ssh_ project under the project’s open source license.
   [SBT]: https://github.com/harrah/xsbt/wiki
   [SLF4J]: http://www.slf4j.org/
   [logback]: http://logback.qos.ch/
+  [APL 2.0]: http://www.apache.org/licenses/LICENSE-2.0
