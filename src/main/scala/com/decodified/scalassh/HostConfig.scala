@@ -93,13 +93,16 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
   }
 
   private def keyfileLogin(settings: Map[String, String], source: String) = {
+    import PublicKeyLogin._
     setting("username", settings, source).right.map { user =>
       val keyfile = setting("keyfile", settings, source).right.toOption
       val passphrase = setting("passphrase", settings, source).right.toOption
       PublicKeyLogin(
         user,
         passphrase.map(SimplePasswordProducer),
-        keyfile.map(_ :: Nil).getOrElse(PublicKeyLogin.DefaultKeyLocations)
+        keyfile.map { kf =>
+          if (kf.startsWith("+")) kf.tail :: DefaultKeyLocations else kf :: Nil
+        }.getOrElse(DefaultKeyLocations)
       )
     }
   }

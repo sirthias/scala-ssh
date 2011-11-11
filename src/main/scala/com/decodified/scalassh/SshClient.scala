@@ -63,6 +63,11 @@ class SshClient(val config: HostConfig) {
   }
 
   protected def authenticate(client: SSHClient) = {
+    def existing(filenames: List[String]) = filenames.filter(new File(_).exists) match {
+      case Nil => sys.error("None of the configured keyfiles exists: " + filenames.mkString(", "))
+      case files => files
+    }
+
     require(client.isConnected && !client.isAuthenticated)
     log.info("Authenticating to {} using {} ...", endpoint, config.login)
     config.login match {
@@ -73,12 +78,12 @@ class SshClient(val config: HostConfig) {
         }
       case PublicKeyLogin(user, None, keyfileLocations) =>
         protect("Could not authenticate (with keyfile) to") {
-          client.authPublickey(user, keyfileLocations.filter(new File(_).exists): _*)
+          client.authPublickey(user, existing(keyfileLocations): _*)
           client
         }
       case PublicKeyLogin(user, Some(passProducer), keyfileLocations) =>
         protect("Could not authenticate (with encrypted keyfile) to") {
-          client.authPublickey(user, keyfileLocations.map(loc => client.loadKeys(loc, passProducer)): _*)
+          client.authPublickey(user, existing(keyfileLocations).map(client.loadKeys(_, passProducer)): _*)
           client
         }
     }
