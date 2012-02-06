@@ -11,14 +11,16 @@ It builds on [sshj] to provide the following features:
 
 ## Installation
 
-There is no official release yet. Publishing of release artifacts on <http://scala-tools.org> is pending.
-If you use [SBT] you will be able to pull in the _scala-ssh_ artifacts with:
+The current release is *0.5.0*, it's available from <http://repo.spray.cc>.
+If you use [SBT] you can pull in the _scala-ssh_ artifacts with:
+
+    resolvers += "spray repo" at "http://repo.spray.cc"
 
     libraryDependencies += "com.decodified" %% "scala-ssh" % "0.5.0"
 
 [sshj] uses [SLF4J] for logging, so you might want to also add [logback] to your dependencies:
 
-    libraryDependencies += "ch.qos.logback" % "logback-classic" % "0.9.29"
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.0"
 
 Additionally, in many cases you will need the following two artifacts, which provide additional cypher and compression
 support:
@@ -125,3 +127,4 @@ _scala-ssh_ project under the project’s open source license.
   [SBT]: https://github.com/harrah/xsbt/wiki
   [SLF4J]: http://www.slf4j.org/
   [logback]: http://logback.qos.ch/
+  [APL 2.0]: http://www.apache.org/licenses/LICENSE-2.0

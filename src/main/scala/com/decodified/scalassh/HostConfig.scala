@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 Mathias Doenitz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.decodified.scalassh
 
 import net.schmizz.sshj.{DefaultConfig, Config}
@@ -77,13 +93,16 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
   }
 
   private def keyfileLogin(settings: Map[String, String], source: String) = {
+    import PublicKeyLogin._
     setting("username", settings, source).right.map { user =>
       val keyfile = setting("keyfile", settings, source).right.toOption
       val passphrase = setting("passphrase", settings, source).right.toOption
       PublicKeyLogin(
         user,
         passphrase.map(SimplePasswordProducer),
-        keyfile.map(_ :: Nil).getOrElse(PublicKeyLogin.DefaultKeyLocations)
+        keyfile.map { kf =>
+          if (kf.startsWith("+")) kf.tail :: DefaultKeyLocations else kf :: Nil
+        }.getOrElse(DefaultKeyLocations)
       )
     }
   }
