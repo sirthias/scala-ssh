@@ -6,7 +6,7 @@ organization := "com.decodified"
 
 organizationHomepage := Some(new URL("http://decodified.com"))
 
-description := "A Scala library for easy and idiomatic JSON (de)serialization"
+description := "A Scala library providing remote shell access via SSH"
 
 homepage := Some(new URL("https://github.com/sirthias/scala-ssh"))
 
@@ -57,11 +57,10 @@ publishTo <<= version { version =>
 // ls-sbt
 ///////////////
 
-
 seq(lsSettings:_*)
 
-(LsKeys.tags in LsKeys.lsync) := Seq("json")
+(LsKeys.tags in LsKeys.lsync) := Seq("ssh")
 
-(LsKeys.docsUrl in LsKeys.lsync) := Some(new URL("http://spray.github.com/spray/api/spray-json/"))
+(LsKeys.docsUrl in LsKeys.lsync) := Some(new URL("https://github.com/sirthias/scala-ssh/"))
 
 (externalResolvers in LsKeys.lsync) := Seq("spray repo" at "http://repo.spray.cc")
