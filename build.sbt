@@ -1,12 +1,12 @@
 name := "scala-ssh"
 
-version := "0.5.0-SNAPSHOT"
+version := "0.5.0"
 
 organization := "com.decodified"
 
 organizationHomepage := Some(new URL("http://decodified.com"))
 
-description := "A Scala library for easy and idiomatic JSON (de)serialization"
+description := "A Scala library providing remote shell access via SSH"
 
 homepage := Some(new URL("https://github.com/sirthias/scala-ssh"))
 
@@ -28,8 +28,7 @@ libraryDependencies ++= Seq(
 )
 
 resolvers ++= Seq(
-    "Akka repo" at "http://akka.io/repository/",
-    "spray repo" at "http://repo.spray.cc/"
+    "Akka repo" at "http://akka.io/repository/"
 )
 
 
@@ -43,7 +42,7 @@ publishMavenStyle := true
 
 publishTo <<= version { version =>
   Some {
-    "spray repo" at {
+    "spray nexus" at {
       // public uri is repo.spray.cc, we use an SSH tunnel to the nexus here
       "http://localhost:42424/content/repositories/" + {
         if (version.trim.endsWith("SNAPSHOT")) "snapshots/" else"releases/"
@@ -57,11 +56,10 @@ publishTo <<= version { version =>
 // ls-sbt
 ///////////////
 
-
 seq(lsSettings:_*)
 
-(LsKeys.tags in LsKeys.lsync) := Seq("json")
+(LsKeys.tags in LsKeys.lsync) := Seq("ssh")
 
-(LsKeys.docsUrl in LsKeys.lsync) := Some(new URL("http://spray.github.com/spray/api/spray-json/"))
+(LsKeys.docsUrl in LsKeys.lsync) := Some(new URL("https://github.com/sirthias/scala-ssh/"))
 
 (externalResolvers in LsKeys.lsync) := Seq("spray repo" at "http://repo.spray.cc")
