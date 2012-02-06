@@ -28,8 +28,7 @@ libraryDependencies ++= Seq(
 )
 
 resolvers ++= Seq(
-    "Akka repo" at "http://akka.io/repository/",
-    "spray repo" at "http://repo.spray.cc/"
+    "Akka repo" at "http://akka.io/repository/"
 )
 
 
@@ -43,7 +42,7 @@ publishMavenStyle := true
 
 publishTo <<= version { version =>
   Some {
-    "spray repo" at {
+    "spray nexus" at {
       // public uri is repo.spray.cc, we use an SSH tunnel to the nexus here
       "http://localhost:42424/content/repositories/" + {
         if (version.trim.endsWith("SNAPSHOT")) "snapshots/" else"releases/"
