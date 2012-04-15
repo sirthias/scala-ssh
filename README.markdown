@@ -37,7 +37,7 @@ The highest-level API element provided by _scala-ssh_ is the `SSH` object. You u
 
     SSH("example.com") { client =>
       client.exec("ls -a").right.map { result =>
-        println("Result:\n" + result.stdOutAsString)
+        println("Result:\n" + result.stdOutAsString())
       }
     }
 
