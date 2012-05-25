@@ -90,7 +90,9 @@ These key are defined:
 * `password`: required for login-type `password`, ignored otherwise
 
 * `keyfile`: optionally specifies the location of the user keyfile to use with login-type `keyfile`,
-  if not given the default files `~/.ssh/id_rsa` and `~/.ssh/id_dsa` are tried, ignored for login-type `password`
+  if not given the default files `~/.ssh/id_rsa` and `~/.ssh/id_dsa` are tried, ignored for login-type `password`,
+  if the filename starts with a `+` the file is searched in addition to the default locations,
+  if the filename starts with `classpath:` it is interpreted as the name of a classpath resource holding the private key
 
 * `passphrase`: optionally specifies the passphrase for the keyfile, if not given the keyfile is assumed to be
   unencrypted, ignored for login-type `password`

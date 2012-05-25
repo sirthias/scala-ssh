@@ -18,8 +18,10 @@ package com.decodified.scalassh
 
 import java.util.concurrent.TimeUnit
 import net.schmizz.sshj.SSHClient
-import java.io.File
 import org.slf4j.LoggerFactory
+import net.schmizz.sshj.userauth.keyprovider.KeyProvider
+import io.Source
+import java.io.{InputStream, FileNotFoundException, FileInputStream, File}
 
 class SshClient(val config: HostConfig) {
   lazy val log = LoggerFactory.getLogger(getClass)
@@ -63,9 +65,26 @@ class SshClient(val config: HostConfig) {
   }
 
   protected def authenticate(client: SSHClient) = {
-    def existing(filenames: List[String]) = filenames.filter(new File(_).exists) match {
-      case Nil => sys.error("None of the configured keyfiles exists: " + filenames.mkString(", "))
-      case files => files
+    def keyProviders(locations: List[String], passProducer: PasswordProducer): List[KeyProvider] = {
+      def inputStream(location: String): Option[InputStream] = {
+        if (location.startsWith("classpath:")) {
+          val resource = location.substring("classpath:".length)
+          Option(getClass.getClassLoader.getResourceAsStream(resource))
+            .orElse(throw new RuntimeException("Classpath resource '" + resource + "' containing private key could not be found"))
+        } else {
+          try Some(new FileInputStream(location))
+          catch { case _: FileNotFoundException => None }
+        }
+      }
+      locations.flatMap { location =>
+        inputStream(location).map { stream =>
+          val privateKey = Source.fromInputStream(stream).getLines().mkString("\n")
+          client.loadKeys(privateKey, null, passProducer)
+        }
+      } match {
+        case Nil => sys.error("None of the configured keyfiles exists: " + locations.mkString(", "))
+        case x => x
+      }
     }
 
     require(client.isConnected && !client.isAuthenticated)
@@ -76,14 +95,9 @@ class SshClient(val config: HostConfig) {
           client.authPassword(user, passProducer)
           client
         }
-      case PublicKeyLogin(user, None, keyfileLocations) =>
+      case PublicKeyLogin(user, passProducer, keyfileLocations) =>
         protect("Could not authenticate (with keyfile) to") {
-          client.authPublickey(user, existing(keyfileLocations): _*)
-          client
-        }
-      case PublicKeyLogin(user, Some(passProducer), keyfileLocations) =>
-        protect("Could not authenticate (with encrypted keyfile) to") {
-          client.authPublickey(user, existing(keyfileLocations).map(client.loadKeys(_, passProducer)): _*)
+          client.authPublickey(user, keyProviders(keyfileLocations, passProducer.getOrElse(null)): _*)
           client
         }
     }
