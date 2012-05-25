@@ -36,6 +36,8 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 publishMavenStyle := true
 
+crossPaths := false
+
 publishTo <<= version { version =>
   Some {
     "spray nexus" at {
