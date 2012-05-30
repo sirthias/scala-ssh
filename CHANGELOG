@@ -1,7 +1,6 @@
 Version 0.6.0 (2012-05-30)
 --------------------------
 - Upgraded to
-  - Scala 2.9.2
   - sshj 0.8.0
   - jzlib 1.1.1
 - Added option for loading the private key file from the classpath
