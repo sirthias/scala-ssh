@@ -1,0 +1,34 @@
+
+{
+ "organization":"com.decodified",
+ "name":"scala-ssh",
+ "version":"0.6.0",
+ "description":"A Scala library providing remote shell access via SSH",
+ "site":"https://github.com/sirthias/scala-ssh",
+ "tags":["ssh"],
+ "docs":"https://github.com/sirthias/scala-ssh/",
+ "licenses": [{
+   "name": "Apache 2",
+   "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  }],
+ "resolvers": ["http://repo.spray.cc"],
+ "dependencies": [{
+   "organization":"net.schmizz",
+   "name": "sshj",
+   "version": "0.8.0"
+  },{
+   "organization":"org.slf4j",
+   "name": "slf4j-api",
+   "version": "1.6.4"
+  },{
+   "organization":"org.bouncycastle",
+   "name": "bcprov-jdk16",
+   "version": "1.46"
+  },{
+   "organization":"com.jcraft",
+   "name": "jzlib",
+   "version": "1.1.1"
+  }],
+ "scalas": ["2.9.2"],
+ "sbt": false
+}
