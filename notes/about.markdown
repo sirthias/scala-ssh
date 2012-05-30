@@ -1,1 +1,9 @@
-_scala-ssh_ is a Scala library providing remote shell access via SSH.
+[scala-ssh](https://github.com/sirthias/scala-ssh) is a Scala library providing remote shell access via SSH.
+It builds on [sshj](https://github.com/shikhar/sshj) to provide the following features:
+
+* Remote execution of one or more shell commands
+* Access to `stdin`, `stdout`, `stderr` and exitcode of remote shell commands
+* Authentication via password or public key
+* Host key verification via `known_hosts` file or explicit fingerprint
+* Convenient configuration of remote host properties via config file, resource or directly in code
+* Scala-idiomatic API
