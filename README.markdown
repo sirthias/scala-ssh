@@ -11,23 +11,23 @@ It builds on [sshj] to provide the following features:
 
 ## Installation
 
-The current release is *0.5.0*, it's available from <http://repo.spray.cc>.
+The current release is *0.6.0*, it's available from <http://repo.spray.cc>.
 If you use [SBT] you can pull in the _scala-ssh_ artifacts with:
 
     resolvers += "spray repo" at "http://repo.spray.cc"
 
-    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.5.0"
+    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.6.0"
 
 [sshj] uses [SLF4J] for logging, so you might want to also add [logback] to your dependencies:
 
-    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.0"
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.3"
 
 Additionally, in many cases you will need the following two artifacts, which provide additional cypher and compression
 support:
 
     libraryDependencies ++= Seq(
       "org.bouncycastle" % "bcprov-jdk16" % "1.46",
-      "com.jcraft" % "jzlib" % "1.0.7"
+      "com.jcraft" % "jzlib" % "1.1.1"
     )
 
 
@@ -90,7 +90,9 @@ These key are defined:
 * `password`: required for login-type `password`, ignored otherwise
 
 * `keyfile`: optionally specifies the location of the user keyfile to use with login-type `keyfile`,
-  if not given the default files `~/.ssh/id_rsa` and `~/.ssh/id_dsa` are tried, ignored for login-type `password`
+  if not given the default files `~/.ssh/id_rsa` and `~/.ssh/id_dsa` are tried, ignored for login-type `password`,
+  if the filename starts with a `+` the file is searched in addition to the default locations,
+  if the filename starts with `classpath:` it is interpreted as the name of a classpath resource holding the private key
 
 * `passphrase`: optionally specifies the passphrase for the keyfile, if not given the keyfile is assumed to be
   unencrypted, ignored for login-type `password`

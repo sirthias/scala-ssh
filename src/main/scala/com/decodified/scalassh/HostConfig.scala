@@ -100,8 +100,9 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
       PublicKeyLogin(
         user,
         passphrase.map(SimplePasswordProducer),
-        keyfile.map { kf =>
-          if (kf.startsWith("+")) kf.tail :: DefaultKeyLocations else kf :: Nil
+        keyfile.map {
+          case kf if kf.startsWith("+") => kf.tail :: DefaultKeyLocations
+          case kf => kf :: Nil
         }.getOrElse(DefaultKeyLocations)
       )
     }
