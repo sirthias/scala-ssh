@@ -1,0 +1,6 @@
+This is a maintenance release.
+Changes since 0.5.0:
+
+- Upgraded to Scala 2.9.2, sshj 0.8.0 and jzlib 1.1.1
+- Added option for loading the private key file from the classpath
+- Disabled cross-path publishing
