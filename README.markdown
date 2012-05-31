@@ -16,7 +16,7 @@ If you use [SBT] you can pull in the _scala-ssh_ artifacts with:
 
     resolvers += "spray repo" at "http://repo.spray.cc"
 
-    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.6.0"
+    libraryDependencies += "com.decodified" % "scala-ssh" % "0.6.0"
 
 [sshj] uses [SLF4J] for logging, so you might want to also add [logback] to your dependencies:
 
