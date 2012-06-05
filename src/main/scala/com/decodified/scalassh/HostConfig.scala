@@ -103,7 +103,9 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
         keyfile.map {
           case kf if kf.startsWith("+") => kf.tail :: DefaultKeyLocations
           case kf => kf :: Nil
-        }.getOrElse(DefaultKeyLocations)
+        }.getOrElse(DefaultKeyLocations).map(
+          _.replaceFirst("^~/", System.getProperty("user.home") + '/').replace('/', File.separatorChar)
+        )
       )
     }
   }

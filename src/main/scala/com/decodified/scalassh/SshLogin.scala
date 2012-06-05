@@ -31,10 +31,7 @@ case class PublicKeyLogin(
 ) extends SshLogin
 
 object PublicKeyLogin {
-  lazy val DefaultKeyLocations = {
-    val base = System.getProperty("user.home") + File.separator + ".ssh" + File.separator
-    (base + "id_rsa") :: (base + "id_dsa") :: Nil
-  }
+  lazy val DefaultKeyLocations = "~/.ssh/id_rsa" :: "~/.ssh/id_dsa" :: Nil
   def apply(user: String): PublicKeyLogin =
     apply(user, None, DefaultKeyLocations)
   def apply(user: String, keyfileLocations: String*): PublicKeyLogin =
