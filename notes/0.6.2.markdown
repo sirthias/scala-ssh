@@ -1,0 +1,5 @@
+This is a minor improvements release.
+Changes since 0.6.0:
+
+- Added support for configuring groups of hosts with one host file or resource
+- Added resolution of '~' in keyfile location
