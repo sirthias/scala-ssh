@@ -23,6 +23,7 @@ import HostKeyVerifiers._
 import java.security.PublicKey
 import net.schmizz.sshj.common.SecurityUtils
 import net.schmizz.sshj.transport.verification.{OpenSSHKnownHosts, HostKeyVerifier}
+import annotation.tailrec
 
 trait HostConfigProvider extends (String => Validated[HostConfig])
 
@@ -103,7 +104,9 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
         keyfile.map {
           case kf if kf.startsWith("+") => kf.tail :: DefaultKeyLocations
           case kf => kf :: Nil
-        }.getOrElse(DefaultKeyLocations)
+        }.getOrElse(DefaultKeyLocations).map(
+          _.replaceFirst("^~/", System.getProperty("user.home") + '/').replace('/', File.separatorChar)
+        )
       )
     }
   }
@@ -154,16 +157,29 @@ object HostFileConfig {
   def apply(): HostConfigProvider = apply(DefaultHostFileDir)
   def apply(hostFilesDir: String): HostConfigProvider = new FromStringsHostConfigProvider {
     def rawLines(host: String) = {
-      val hostFile = new File(hostFilesDir + File.separator + host)
-      try {
-        Either.cond(
-          hostFile.exists,
-          hostFile.getAbsolutePath -> Source.fromFile(hostFile, "utf8").getLines(),
-          "Host file '%s' not found, either provide one or use a concrete HostConfig, PasswordLogin or PublicKeyLogin".format(hostFile)
-        )
-      } catch {
-        case e: IOException => Left("Could not read host file '%' due to %s".format(hostFile, e))
+      val locations = searchLocations(host).map(name => new File(hostFilesDir + File.separator + name))
+      locations.find(_.exists) match {
+        case Some(file) =>
+          try Right(file.getAbsolutePath -> Source.fromFile(file, "utf8").getLines())
+          catch { case e: IOException => Left("Could not read host file '%' due to %s".format(file, e)) }
+        case None =>
+          Left(("Host files '%s' not found, either provide one or use a concrete HostConfig, PasswordLogin or " +
+            "PublicKeyLogin").format(locations.mkString("', '")))
       }
+    }
+  }
+
+  def searchLocations(name: String): Stream[String] = {
+    if (name.isEmpty) Stream.empty
+    else name #:: {
+      val dotIx = name.indexOf('.')
+      @tailrec def findDigit(i: Int): Int = if (i < 0 || name.charAt(i).isDigit) i else findDigit(i - 1)
+      val digitIx = findDigit(if (dotIx > 0) dotIx - 1 else name.length - 1)
+      if (digitIx >= 0 && digitIx < dotIx)
+        searchLocations(name.updated(digitIx, 'X'))
+      else if (dotIx > 0)
+        searchLocations(name.substring(dotIx + 1))
+      else Stream.empty
     }
   }
 }
@@ -172,16 +188,18 @@ object HostResourceConfig {
   def apply(): HostConfigProvider = apply("")
   def apply(resourceBase: String): HostConfigProvider = new FromStringsHostConfigProvider {
     def rawLines(host: String) = {
-      val hostResource = resourceBase + host
-      try {
-        val resourceStream = getClass.getClassLoader.getResourceAsStream(hostResource)
-        Either.cond(
-          resourceStream != null,
-          hostResource -> Source.fromInputStream(resourceStream, "utf8").getLines(),
-          "Host resource '%s' not found".format(hostResource)
-        )
-      } catch {
-        case e: IOException => Left("Could not read host resource '%' due to %s".format(hostResource, e))
+      val locations = HostFileConfig.searchLocations(host).map(resourceBase + _)
+      locations.map { r =>
+        r -> {
+          val inputStream = getClass.getClassLoader.getResourceAsStream(r)
+          try new StreamCopier().emptyToString(inputStream).split("\n").toList
+          catch { case _: Exception => null }
+        }
+      }.find(_._2 != null) match {
+        case Some(result) => Right(result)
+        case None =>
+          Left(("Host resources '%s' not found, either provide one or use a concrete HostConfig, PasswordLogin or " +
+            "PublicKeyLogin").format(locations.mkString("', '")))
       }
     }
   }

@@ -11,12 +11,12 @@ It builds on [sshj] to provide the following features:
 
 ## Installation
 
-The current release is *0.6.0*, it's available from <http://repo.spray.cc>.
+The current release is *0.6.2*, it's available from <http://repo.spray.cc>.
 If you use [SBT] you can pull in the _scala-ssh_ artifacts with:
 
     resolvers += "spray repo" at "http://repo.spray.cc"
 
-    libraryDependencies += "com.decodified" % "scala-ssh" % "0.6.0"
+    libraryDependencies += "com.decodified" % "scala-ssh" % "0.6.2"
 
 [sshj] uses [SLF4J] for logging, so you might want to also add [logback] to your dependencies:
 
@@ -62,7 +62,27 @@ It provides all the details required for properly establishing an SSH connection
 If you don't provide an explicit `HostConfigProvider` the default one will be used. For every hostname you pass to the
 `SSH.apply` method this default `HostConfigProvider` expects a file `~/.scala-ssh/{hostname}`, which contains the
 properties of a `HostConfig` in a simple config file format (see below for details). The `HostResourceConfig` object
-gives you alternative `HostConfigProvider` implementations that read the host config from JAR resources.
+gives you alternative `HostConfigProvider` implementations that read the host config from classpath resources.
+
+If the file `~/.scala-ssh/{hostname}` (or the classpath resource `{hostname}`) doesn't exist _scala-ssh_ looks for more
+general files (or resources) in the following way:
+
+1. As long as the first segment of the host name (up to the first `.`) contains one or more digits replace the rightmost
+of these with `X` and look for a respectively named file or resource. Repeat until no digits left.
+2. Drop all characters up to (and including) the first `.` from the host name and look for a respectively named file or
+resource.
+3. Repeat from 1. as long as there are characters left.
+
+This means that for a host with name `node42.tier1.example.com` the following locations (either under `~/.scala-ssh/`
+or the classpath, depending on the `HostConfigProvider`) are tried:
+
+1. `node42.tier1.example.com`
+2. `node4X.tier1.example.com`
+3. `nodeXX.tier1.example.com`
+4. `tier1.example.com`
+5. `tierX.example.com`
+6. `example.com`
+7. `com`
 
 
 ## Host Config File Format
