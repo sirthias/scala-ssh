@@ -32,7 +32,7 @@ class SshClient(val config: HostConfig) {
   def exec(command: Command): Validated[CommandResult] = {
     authenticatedClient.right.flatMap { client =>
       startSession(client).right.flatMap { session =>
-        log.info("Executing SSH command on {}: \"{}\"", endpoint, command.command)
+        log.info("Executing SSH command on {}: \"{}\"", Seq(endpoint, command.command): _*)
         protect("Could not execute SSH command on") {
           val channel = session.exec(command.command)
           command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
@@ -88,7 +88,7 @@ class SshClient(val config: HostConfig) {
     }
 
     require(client.isConnected && !client.isAuthenticated)
-    log.info("Authenticating to {} using {} ...", endpoint, config.login)
+    log.info("Authenticating to {} using {} ...", Seq(endpoint, config.login): _*)
     config.login match {
       case PasswordLogin(user, passProducer) =>
         protect("Could not authenticate (with password) to") {
