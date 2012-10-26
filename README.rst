@@ -12,16 +12,18 @@ It builds on sshj_ to provide the following features:
 Installation
 ------------
 
-The current release is *0.6.2*, it's available from <http://repo.spray.cc>.
-If you use SBT_ you can pull in the *scala-ssh* artifacts with::
+The latest release is **0.6.3** and is built against Scala 2.9.2 as well as Scala 2.10.0-RC1.
+It is available from <http://repo.spray.io>. If you use SBT_ you can pull in the *scala-ssh* artifacts with::
 
-    resolvers += "spray repo" at "http://repo.spray.cc"
+    resolvers += "spray repo" at "http://repo.spray.io"
 
-    libraryDependencies += "com.decodified" % "scala-ssh" % "0.6.2"
+    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.6.3" cross CrossVersion.full
+
+(the trailing "cross CrossVersion.full" modifier is only required for SBT_ 0.12.x)
 
 sshj_ uses SLF4J_ for logging, so you might want to also add logback_ to your dependencies::
 
-    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.3"
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.7"
 
 Additionally, in many cases you will need the following two artifacts, which provide additional cypher and compression
 support::
