@@ -221,7 +221,10 @@ object HostKeyVerifiers {
       catch { case e: Exception => Left("Could not read %s due to %s".format(knownHostsFile, e)) }
     } else Left(knownHostsFile.toString + " not found")
   }
-  def forFingerprint(fingerprint: String) = new HostKeyVerifier {
-    def verify(hostname: String, port: Int, key: PublicKey) = SecurityUtils.getFingerprint(key) == fingerprint
+  def forFingerprint(fingerprint: String) = fingerprint match {
+    case "any" | "ANY" => DontVerify
+    case fp => new HostKeyVerifier {
+      def verify(hostname: String, port: Int, key: PublicKey) = SecurityUtils.getFingerprint(key) == fp
+    }
   }
 }
