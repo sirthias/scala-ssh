@@ -14,7 +14,7 @@ startYear := Some(2011)
 
 licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-scalaVersion := "2.10.0-RC1"
+scalaVersion := "2.10.1"
 
 scalacOptions <<= scalaVersion map {
   case x if x startsWith "2.9" =>
@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
 	"org.slf4j" % "slf4j-api" % "1.7.2",
 	"org.bouncycastle" % "bcprov-jdk16" % "1.46" % "provided",
 	"com.jcraft" % "jzlib" % "1.1.1" % "provided",
-	"org.specs2" %% "specs2" % "1.12.2" % "test",
+  "org.specs2" %% "specs2" % "[1.12,)" % "test",
 	"ch.qos.logback" % "logback-classic" % "1.0.3" % "test"
 )
 
@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.9.2", "2.10.0-RC1")
+crossScalaVersions := Seq("2.9.2", "2.10.1")
 
 scalaBinaryVersion <<= scalaVersion(sV => if (CrossVersion.isStable(sV)) CrossVersion.binaryScalaVersion(sV) else sV)
 
