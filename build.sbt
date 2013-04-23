@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.9.2", "2.10.0", "2.10.1")
+crossScalaVersions := Seq("2.9.2", "2.10.1")
 
 scalaBinaryVersion <<= scalaVersion(sV => if (CrossVersion.isStable(sV)) CrossVersion.binaryScalaVersion(sV) else sV)
 
