@@ -1,6 +1,6 @@
 name := "scala-ssh"
 
-version := "0.6.3"
+version := "0.6.4"
 
 organization := "com.decodified"
 
