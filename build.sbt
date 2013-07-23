@@ -53,16 +53,3 @@ publishTo <<= version { version =>
     }
   }
 }
-
-
-///////////////
-// ls-sbt
-///////////////
-
-seq(lsSettings:_*)
-
-(LsKeys.tags in LsKeys.lsync) := Seq("ssh")
-
-(LsKeys.docsUrl in LsKeys.lsync) := Some(new URL("https://github.com/sirthias/scala-ssh/"))
-
-(externalResolvers in LsKeys.lsync) := Seq("spray repo" at "http://repo.spray.io")
