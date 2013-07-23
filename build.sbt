@@ -25,11 +25,11 @@ scalacOptions <<= scalaVersion map {
 
 libraryDependencies ++= Seq(
 	"net.schmizz" % "sshj" % "0.8.1",
-	"org.slf4j" % "slf4j-api" % "1.7.2",
+	"org.slf4j" % "slf4j-api" % "1.7.5",
 	"org.bouncycastle" % "bcprov-jdk16" % "1.46" % "provided",
-	"com.jcraft" % "jzlib" % "1.1.1" % "provided",
+	"com.jcraft" % "jzlib" % "1.1.2" % "provided",
   "org.specs2" %% "specs2" % "[1.12,)" % "test",
-	"ch.qos.logback" % "logback-classic" % "1.0.3" % "test"
+	"ch.qos.logback" % "logback-classic" % "1.0.13" % "test"
 )
 
 
@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.9.2", "2.10.1")
+crossScalaVersions := Seq("2.9.3", "2.10.2")
 
 scalaBinaryVersion <<= scalaVersion(sV => if (CrossVersion.isStable(sV)) CrossVersion.binaryScalaVersion(sV) else sV)
 
