@@ -14,7 +14,7 @@ startYear := Some(2011)
 
 licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.2"
 
 scalacOptions <<= scalaVersion map {
   case x if x startsWith "2.9" =>
