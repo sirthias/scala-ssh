@@ -18,6 +18,9 @@ package com.decodified
 
 package object scalassh {
   type Validated[T] = Either[String, T]
+  class RichSshClient(sshClient: SshClient) extends SshClient(sshClient.config) with ScpTransferable
 
   def make[A, U](a: A)(f: A => U): A = { f(a); a }
+
+  implicit def sshClientToRichClient(sshClient: SshClient) = new RichSshClient(sshClient)
 }

@@ -18,14 +18,17 @@ package com.decodified.scalassh
 
 import org.specs2.Specification
 import java.io.File
+import java.io.FileWriter
 import io.Source
+import Source.{ fromFile => open }
 import org.specs2.execute.{Failure, FailureException}
 
 class SshClientSpec extends Specification { def is =
-
   "The SshClient should be able to" ^
     "properly connect to the test host and fetch a directory listing"           ! simpleTest^
-    "properly connect to the test host and execute three independent commands"  ! threeCommandsTest
+    "properly connect to the test host and execute three independent commands"  ! threeCommandsTest^
+    "properly upload to the test host"                                          ! fileUploadTest^
+    "properly download to the test host"                                        ! fileDownloadTest
 
   def simpleTest = {
     SSH(testHostName) { client =>
@@ -49,6 +52,36 @@ class SshClientSpec extends Specification { def is =
       }
     }.right.get mustEqual (Some(0), Some(127), Some(0))
   }
+
+  def fileUploadTest = {
+    val testFile = make(new File(testFileName)) { file =>
+      val writer = new FileWriter(file)
+      writer.write(testText)
+      writer.close()
+    }
+
+    SSH(testHostName) { client =>
+      client.upload(testFile.getAbsolutePath, testFileName).right.flatMap { _ =>
+        client.exec("cat " + testFileName).right.map { result =>
+          testFile.delete()
+          result.stdOutAsString()
+        }
+      }
+    }.right.get mustEqual testText
+  }
+
+  def fileDownloadTest = {
+    SSH(testHostName) { client =>
+      client.download(testFileName, testFileName).right.map { _ =>
+        make(open(testFileName).getLines.mkString) { _ =>
+          new File(testFileName).delete()
+        }
+      }
+    }.right.get mustEqual testText
+  }
+
+  lazy val testFileName = "testUpload.txt"
+  lazy val testText = "Hello, Scala SSH!"
 
   lazy val testHostName = {
     val fileName = HostFileConfig.DefaultHostFileDir + File.separator + ".testhost"
