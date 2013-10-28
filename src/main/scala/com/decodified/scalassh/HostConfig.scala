@@ -161,7 +161,7 @@ object HostFileConfig {
       locations.find(_.exists) match {
         case Some(file) =>
           try Right(file.getAbsolutePath -> Source.fromFile(file, "utf8").getLines())
-          catch { case e: IOException => Left("Could not read host file '%' due to %s".format(file, e)) }
+          catch { case e: IOException => Left("Could not read host file '%s' due to %s".format(file, e)) }
         case None =>
           Left(("Host files '%s' not found, either provide one or use a concrete HostConfig, PasswordLogin or " +
             "PublicKeyLogin").format(locations.mkString("', '")))
