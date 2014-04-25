@@ -24,13 +24,19 @@ scalacOptions <<= scalaVersion map {
 }
 
 libraryDependencies ++= Seq(
-	"net.schmizz" % "sshj" % "0.8.1",
-	"org.slf4j" % "slf4j-api" % "1.7.5",
-	"org.bouncycastle" % "bcprov-jdk16" % "1.46" % "provided",
-	"com.jcraft" % "jzlib" % "1.1.2" % "provided",
-  "org.specs2" %% "specs2" % "[1.12,)" % "test",
-	"ch.qos.logback" % "logback-classic" % "1.0.13" % "test"
+  "net.schmizz" % "sshj" % "0.9.0",
+  "org.slf4j" % "slf4j-api" % "1.7.7",
+  "org.bouncycastle" % "bcprov-jdk16" % "1.46" % "provided",
+  "com.jcraft" % "jzlib" % "1.1.3" % "provided",
+  "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
 )
+
+libraryDependencies <++= scalaVersion {
+  case x if x startsWith "2.9" =>
+    Seq("org.specs2" %% "specs2" % "[1.12.4,)" % "test")
+  case x if x startsWith "2.10" =>
+    Seq("org.specs2" %% "specs2" % "2.3.11" % "test")
+}
 
 
 ///////////////
