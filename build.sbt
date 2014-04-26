@@ -14,12 +14,12 @@ startYear := Some(2011)
 
 licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.0"
 
 scalacOptions <<= scalaVersion map {
   case x if x startsWith "2.9" =>
     Seq("-unchecked", "-deprecation", "-encoding", "utf8")
-  case x if x startsWith "2.10" =>
+  case x if x startsWith "2.1" =>
     Seq("-feature", "-language:implicitConversions", "-unchecked", "-deprecation", "-encoding", "utf8")
 }
 
@@ -34,7 +34,7 @@ libraryDependencies ++= Seq(
 libraryDependencies <++= scalaVersion {
   case x if x startsWith "2.9" =>
     Seq("org.specs2" %% "specs2" % "[1.12.4,)" % "test")
-  case x if x startsWith "2.10" =>
+  case x if x startsWith "2.1" =>
     Seq("org.specs2" %% "specs2" % "2.3.11" % "test")
 }
 
@@ -43,7 +43,7 @@ libraryDependencies <++= scalaVersion {
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.9.3", "2.10.4")
+crossScalaVersions := Seq("2.9.3", "2.10.4", "2.11.0")
 
 scalaBinaryVersion <<= scalaVersion(sV => if (CrossVersion.isStable(sV)) CrossVersion.binaryScalaVersion(sV) else sV)
 
