@@ -54,7 +54,7 @@ publishTo <<= version { version =>
     "spray repo" at {
       // public uri is repo.spray.io, we use an SSH tunnel to the nexus here
       "http://localhost:42424/content/repositories/" + {
-        if (version.trim.endsWith("SNAPSHOT")) "snapshots/" else"releases/"
+        if (version.trim.endsWith("SNAPSHOT")) "snapshots/" else "releases/"
       }
     }
   }

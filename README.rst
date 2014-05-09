@@ -15,7 +15,7 @@ It builds on SSHJ_ to provide the following features:
 Installation
 ------------
 
-The latest release is **0.6.4** and is built against Scala 2.9.3 as well as Scala 2.10.2.
+The latest release is **0.6.4** and is built against Scala 2.9.3, Scala 2.10 and Scala 2.11.
 It is available from http://repo.spray.io. If you use SBT_ you can pull in the *scala-ssh* artifacts with::
 
     resolvers += "spray repo" at "http://repo.spray.io"
@@ -26,14 +26,14 @@ It is available from http://repo.spray.io. If you use SBT_ you can pull in the *
 
 SSHJ_ uses SLF4J_ for logging, so you might want to also add logback_ to your dependencies::
 
-    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.13"
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"
 
 Additionally, in many cases you will need the following two artifacts, which provide additional cypher and compression
 support::
 
     libraryDependencies ++= Seq(
       "org.bouncycastle" % "bcprov-jdk16" % "1.46",
-      "com.jcraft" % "jzlib" % "1.1.2"
+      "com.jcraft" % "jzlib" % "1.1.3"
     )
 
 
