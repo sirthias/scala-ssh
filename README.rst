@@ -8,6 +8,9 @@ It builds on SSHJ_ to provide the following features:
 * Convenient configuration of remote host properties via config file, resource or directly in code
 * Scala-idiomatic API
 
+.. image:: https://api.travis-ci.org/sirthias/scala-ssh.png?branch=master
+   :target: https://travis-ci.org/sirthias/scala-ssh
+   :alt: Build Status
 
 Installation
 ------------
