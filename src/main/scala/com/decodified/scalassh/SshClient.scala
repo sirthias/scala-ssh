@@ -88,7 +88,7 @@ class SshClient(val config: HostConfig) {
     }
 
     require(client.isConnected && !client.isAuthenticated)
-    log.info("Authenticating to {} using {} ...", Seq(endpoint, config.login): _*)
+    log.info("Authenticating to {} using {} ...", Seq(endpoint, config.login.user): _*)
     config.login match {
       case PasswordLogin(user, passProducer) =>
         protect("Could not authenticate (with password) to") {
