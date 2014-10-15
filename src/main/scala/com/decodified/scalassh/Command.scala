@@ -17,7 +17,7 @@
 package com.decodified.scalassh
 
 import net.schmizz.sshj.connection.channel.direct.Session
-import java.io.{FileInputStream, File, ByteArrayInputStream, InputStream}
+import java.io.{ FileInputStream, File, ByteArrayInputStream, InputStream }
 
 case class Command(command: String, input: CommandInput = CommandInput.NoInput, timeout: Option[Int] = None)
 

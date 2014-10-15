@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
 import io.Source
-import java.io.{InputStream, FileNotFoundException, FileInputStream, File}
+import java.io.{ InputStream, FileNotFoundException, FileInputStream, File }
 
 class SshClient(val config: HostConfig) {
   lazy val log = LoggerFactory.getLogger(getClass)
@@ -32,17 +32,17 @@ class SshClient(val config: HostConfig) {
   val client = createClient(config)
 
   def exec(command: Command): Validated[CommandResult] = {
-    authenticatedClient.right.flatMap { client =>
-      startSession(client).right.flatMap { session =>
+    authenticatedClient.right.flatMap { client ⇒
+      startSession(client).right.flatMap { session ⇒
         execWithSession(command, session)
       }
     }
   }
 
   def execPTY(command: Command): Validated[CommandResult] = {
-    authenticatedClient.right.flatMap { client =>
-      startSession(client).right.flatMap { session =>
-        config.ptyConfig.fold { session.allocateDefaultPTY() }{ ptyConf =>
+    authenticatedClient.right.flatMap { client ⇒
+      startSession(client).right.flatMap { session ⇒
+        config.ptyConfig.fold { session.allocateDefaultPTY() } { ptyConf ⇒
           session.allocatePTY(ptyConf.term, ptyConf.cols, ptyConf.rows, ptyConf.width, ptyConf.height, ptyConf.modes)
         }
         execWithSession(command, session)
@@ -56,15 +56,15 @@ class SshClient(val config: HostConfig) {
       val channel = session.exec(command.command)
       command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
       (command.timeout orElse config.commandTimeout) match {
-        case Some(timeout) => channel.join(timeout, TimeUnit.MILLISECONDS)
-        case None => channel.join()
+        case Some(timeout) ⇒ channel.join(timeout, TimeUnit.MILLISECONDS)
+        case None          ⇒ channel.join()
       }
       new CommandResult(channel)
     }
   }
 
   protected def createClient(config: HostConfig) = {
-    make(new SSHClient(config.sshjConfig)) { client =>
+    make(new SSHClient(config.sshjConfig)) { client ⇒
       config.connectTimeout.foreach(client.setConnectTimeout(_))
       config.connectionTimeout.foreach(client.setTimeout(_))
       client.addHostKeyVerifier(config.hostKeyVerifier)
@@ -90,29 +90,29 @@ class SshClient(val config: HostConfig) {
             .orElse(throw new RuntimeException("Classpath resource '" + resource + "' containing private key could not be found"))
         } else {
           try Some(new FileInputStream(location))
-          catch { case _: FileNotFoundException => None }
+          catch { case _: FileNotFoundException ⇒ None }
         }
       }
-      locations.flatMap { location =>
-        inputStream(location).map { stream =>
+      locations.flatMap { location ⇒
+        inputStream(location).map { stream ⇒
           val privateKey = Source.fromInputStream(stream).getLines().mkString("\n")
           client.loadKeys(privateKey, null, passProducer)
         }
       } match {
-        case Nil => sys.error("None of the configured keyfiles exists: " + locations.mkString(", "))
-        case x => x
+        case Nil ⇒ sys.error("None of the configured keyfiles exists: " + locations.mkString(", "))
+        case x   ⇒ x
       }
     }
 
     require(client.isConnected && !client.isAuthenticated)
     log.info("Authenticating to {} using {} ...", Seq(endpoint, config.login.user): _*)
     config.login match {
-      case PasswordLogin(user, passProducer) =>
+      case PasswordLogin(user, passProducer) ⇒
         protect("Could not authenticate (with password) to") {
           client.authPassword(user, passProducer)
           client
         }
-      case PublicKeyLogin(user, passProducer, keyfileLocations) =>
+      case PublicKeyLogin(user, passProducer, keyfileLocations) ⇒
         protect("Could not authenticate (with keyfile) to") {
           client.authPublickey(user, keyProviders(keyfileLocations, passProducer.getOrElse(null)): _*)
           client
@@ -132,9 +132,9 @@ class SshClient(val config: HostConfig) {
     client.close()
   }
 
-  protected def protect[T](errorMsg: => String)(f: => T) = {
+  protected def protect[T](errorMsg: ⇒ String)(f: ⇒ T) = {
     try { Right(f) }
-    catch { case e: Exception => Left("%s %s due to %s".format(errorMsg, endpoint, e)) }
+    catch { case e: Exception ⇒ Left("%s %s due to %s".format(errorMsg, endpoint, e)) }
   }
 }
 

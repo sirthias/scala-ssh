@@ -17,12 +17,11 @@
 package com.decodified.scalassh
 
 object SSH {
-  def apply[T](host: String, configProvider: HostConfigProvider = HostFileConfig())
-              (body: SshClient => Result[T]): Validated[T] = {
-    SshClient(host, configProvider).right.flatMap { client =>
+  def apply[T](host: String, configProvider: HostConfigProvider = HostFileConfig())(body: SshClient ⇒ Result[T]): Validated[T] = {
+    SshClient(host, configProvider).right.flatMap { client ⇒
       val result = {
         try { body(client).result }
-        catch { case e: Exception => Left(e.toString) }
+        catch { case e: Exception ⇒ Left(e.toString) }
       }
       client.close()
       result
