@@ -17,8 +17,10 @@
 package com.decodified.scalassh
 
 import java.util.concurrent.TimeUnit
+import com.decodified.scalassh.CommandResult
 import net.schmizz.sshj.SSHClient
 import org.slf4j.LoggerFactory
+import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
 import io.Source
 import java.io.{InputStream, FileNotFoundException, FileInputStream, File}
@@ -32,17 +34,32 @@ class SshClient(val config: HostConfig) {
   def exec(command: Command): Validated[CommandResult] = {
     authenticatedClient.right.flatMap { client =>
       startSession(client).right.flatMap { session =>
-        log.info("Executing SSH command on {}: \"{}\"", Seq(endpoint, command.command): _*)
-        protect("Could not execute SSH command on") {
-          val channel = session.exec(command.command)
-          command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
-          (command.timeout orElse config.commandTimeout) match {
-            case Some(timeout) => channel.join(timeout, TimeUnit.MILLISECONDS)
-            case None => channel.join()
-          }
-          new CommandResult(channel)
-        }
+        execWithSession(command, session)
       }
+    }
+  }
+
+  def execPTY(command: Command): Validated[CommandResult] = {
+    authenticatedClient.right.flatMap { client =>
+      startSession(client).right.flatMap { session =>
+        config.ptyConfig.fold { session.allocateDefaultPTY() }{ ptyConf =>
+          session.allocatePTY(ptyConf.term, ptyConf.cols, ptyConf.rows, ptyConf.width, ptyConf.height, ptyConf.modes)
+        }
+        execWithSession(command, session)
+      }
+    }
+  }
+
+  def execWithSession(command: Command, session: Session) = {
+    log.info("Executing SSH command on {}: \"{}\"", Seq(endpoint, command.command): _*)
+    protect("Could not execute SSH command on") {
+      val channel = session.exec(command.command)
+      command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
+      (command.timeout orElse config.commandTimeout) match {
+        case Some(timeout) => channel.join(timeout, TimeUnit.MILLISECONDS)
+        case None => channel.join()
+      }
+      new CommandResult(channel)
     }
   }
 

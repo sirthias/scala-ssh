@@ -22,6 +22,7 @@ import java.io.{IOException, File}
 import HostKeyVerifiers._
 import java.security.PublicKey
 import net.schmizz.sshj.common.SecurityUtils
+import net.schmizz.sshj.connection.channel.direct.PTYMode
 import net.schmizz.sshj.transport.verification.{OpenSSHKnownHosts, HostKeyVerifier}
 import annotation.tailrec
 
@@ -45,8 +46,11 @@ case class HostConfig(
   commandTimeout: Option[Int] = None,
   enableCompression: Boolean = false,
   hostKeyVerifier: HostKeyVerifier = KnownHosts.right.toOption.getOrElse(DontVerify),
+  ptyConfig: Option[PTYConfig] = None,
   sshjConfig: Config = HostConfig.DefaultSshjConfig
 )
+
+case class PTYConfig(term: String, cols: Int, rows: Int, width: Int, height: Int, modes: java.util.Map[PTYMode, Integer])
 
 object HostConfig {
   lazy val DefaultSshjConfig = new DefaultConfig
