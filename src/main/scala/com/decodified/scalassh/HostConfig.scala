@@ -133,14 +133,12 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
 
   private def optIntSetting(key: String, settings: Map[String, String], source: String) = {
     setting(key, settings, source) match {
-      case Right(value) ⇒ {
-        try {
-          Right(Some(value.toInt))
-        } catch {
-          case _: Exception ⇒ Left(("Value '%s' for setting '%s' in host config '%s' " +
+      case Right(value) ⇒
+        try Right(Some(value.toInt))
+        catch {
+          case _: NumberFormatException ⇒ Left(("Value '%s' for setting '%s' in host config '%s' " +
             "is not a legal integer").format(value, key, source))
         }
-      }
       case Left(_) ⇒ Right(None)
     }
   }

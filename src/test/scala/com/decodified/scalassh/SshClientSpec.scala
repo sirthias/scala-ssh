@@ -62,22 +62,24 @@ class SshClientSpec extends Specification {
     }
 
     SSH(testHostName) { client ⇒
-      client.upload(testFile.getAbsolutePath, testFileName).right.flatMap { _ ⇒
+      try client.upload(testFile.getAbsolutePath, testFileName).right.flatMap { _ ⇒
         client.exec("cat " + testFileName).right.map { result ⇒
           testFile.delete()
           result.stdOutAsString()
         }
       }
+      finally client.close()
     } mustEqual Right(testText)
   }
 
   def fileDownloadTest = {
     SSH(testHostName) { client ⇒
-      client.download(testFileName, testFileName).right.map { _ ⇒
+      try client.download(testFileName, testFileName).right.map { _ ⇒
         make(open(testFileName).getLines.mkString) { _ ⇒
           new File(testFileName).delete()
         }
       }
+      finally client.close()
     } mustEqual Right(testText)
   }
 
