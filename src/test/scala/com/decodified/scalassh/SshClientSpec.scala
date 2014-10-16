@@ -24,6 +24,8 @@ import Source.{ fromFile ⇒ open }
 import org.specs2.execute.{ Failure, FailureException }
 
 class SshClientSpec extends Specification {
+  sequential
+
   def is =
     "The SshClient should be able to" ^
       "properly connect to the test host and fetch a directory listing" ! simpleTest ^

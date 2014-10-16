@@ -1,3 +1,20 @@
+Version 0.7.0 (2014-10-15)
+--------------------------
+- Upgraded to sshj 0.10.0 and slf4j 1.7.7
+- Cross-published against Scala 2.10.4 and Scala 2.11.2
+- Dropped support for Scala 2.9
+- Fixed possible RuntimeException in HostConfig (thx to HairyFotr)
+- Fixed potential logging of user password (thx to Joseph Price)
+- Added SFTP and SCP capabilities (thx to Philip Cali)
+- Added PTY configuration for SSH sessions (thx to Dan Osipov)
+
+
+Version 0.6.4 (2013-07-23)
+--------------------------
+- Upgraded to sshj 0.9.0 and slf4j 1.7.5
+- Cross-published against Scala 2.9.3 and Scala 2.10.2
+
+
 Version 0.6.3 (2012-10-26)
 --------------------------
 - Upgraded to sshj 0.8.1 and slf4j 1.7.2

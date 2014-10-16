@@ -15,14 +15,10 @@ It builds on SSHJ_ to provide the following features:
 Installation
 ------------
 
-The latest release is **0.6.4** and is built against Scala 2.9.3, Scala 2.10 and Scala 2.11.
-It is available from http://repo.spray.io. If you use SBT_ you can pull in the *scala-ssh* artifacts with::
+The latest release is **0.7.0** and is built against Scala 2.10 and Scala 2.11.
+It is available from Maven Central. If you use SBT_ you can pull in the *scala-ssh* artifacts with::
 
-    resolvers += "spray repo" at "http://repo.spray.io"
-
-    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.6.4" cross CrossVersion.full
-
-(the trailing "cross CrossVersion.full" modifier is only required for SBT_ 0.12.x)
+    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.7.0"
 
 SSHJ_ uses SLF4J_ for logging, so you might want to also add logback_ to your dependencies::
 
