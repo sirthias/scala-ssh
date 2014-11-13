@@ -22,6 +22,12 @@ import org.slf4j.LoggerFactory
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
+import net.schmizz.sshj.userauth.method.AuthMethod
+import com.jcraft.jsch.agentproxy._
+import com.jcraft.jsch.agentproxy.connector._
+import com.jcraft.jsch.agentproxy.sshj._
+import scala.collection.JavaConversions._
+import scala.util.{ Try, Success, Failure }
 import scala.io.Source
 
 class SshClient(val config: HostConfig) {
@@ -102,6 +108,16 @@ class SshClient(val config: HostConfig) {
       }
     }
 
+    def agentProxyAuthMethods = {
+      def authMethods(agent: AgentProxy): Seq[AuthMethod] = agent.getIdentities().map(new AuthAgent(agent, _))
+      def agentProxy: Try[AgentProxy] = agentConnector map (new AgentProxy(_))
+      def agentConnector: Try[Connector] = Try { ConnectorFactory.getDefault().createConnector() }
+      agentProxy map authMethods match {
+        case Success(m) ⇒ m
+        case Failure(e) ⇒ throw new RuntimeException("Agent proxy could not be initialized", e)
+      }
+    }
+
     require(client.isConnected && !client.isAuthenticated)
     log.info("Authenticating to {} using {} ...", Seq(endpoint, config.login.user): _*)
     config.login match {
@@ -113,6 +129,11 @@ class SshClient(val config: HostConfig) {
       case PublicKeyLogin(user, passProducer, keyfileLocations) ⇒
         protect("Could not authenticate (with keyfile) to") {
           client.authPublickey(user, keyProviders(keyfileLocations, passProducer.orNull): _*)
+          client
+        }
+      case AgentLogin(user, host) ⇒
+        protect("Could not authenticate (with agent proxy) to") {
+          client.auth(user, agentProxyAuthMethods)
           client
         }
     }

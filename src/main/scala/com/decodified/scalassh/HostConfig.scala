@@ -94,6 +94,7 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
     setting("login-type", settings, source).right.flatMap {
       case "password" ⇒ passwordLogin(settings, source)
       case "keyfile"  ⇒ keyfileLogin(settings, source)
+      case "agent"    ⇒ agentLogin(settings, source)
       case x          ⇒ Left("Illegal login-type setting '%s' in host config '%s': expecting either 'password' or 'keyfile'".format(x, source))
     }
   }
@@ -122,6 +123,12 @@ abstract class FromStringsHostConfigProvider extends HostConfigProvider {
         )
       )
     }
+  }
+
+  private def agentLogin(settings: Map[String, String], source: String) = {
+    val user = setting("username", settings, source).right.toOption
+    val host = setting("host", settings, source).right.toOption
+    Right(AgentLogin(user.getOrElse(System.getProperty("user.home")), host.getOrElse("localhost")))
   }
 
   private def setting(key: String, settings: Map[String, String], source: String) = {
@@ -174,8 +181,8 @@ object HostFileConfig {
           try Right(file.getAbsolutePath -> Source.fromFile(file, "utf8").getLines())
           catch { case e: IOException ⇒ Left("Could not read host file '%s' due to %s".format(file, e)) }
         case None ⇒
-          Left(("Host files '%s' not found, either provide one or use a concrete HostConfig, PasswordLogin or " +
-            "PublicKeyLogin").format(locations.mkString("', '")))
+          Left(("Host files '%s' not found, either provide one or use a concrete HostConfig, PasswordLogin, " +
+            "PublicKeyLogin or AgentLogin").format(locations.mkString("', '")))
       }
     }
   }
@@ -209,8 +216,8 @@ object HostResourceConfig {
       }.find(_._2 != null) match {
         case Some(result) ⇒ Right(result)
         case None ⇒
-          Left(("Host resources '%s' not found, either provide one or use a concrete HostConfig, PasswordLogin or " +
-            "PublicKeyLogin").format(locations.mkString("', '")))
+          Left(("Host resources '%s' not found, either provide one or use a concrete HostConfig, PasswordLogin, " +
+            "PublicKeyLogin or AgentLogin").format(locations.mkString("', '")))
       }
     }
   }

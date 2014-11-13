@@ -38,3 +38,10 @@ object PublicKeyLogin {
   def apply(user: String, passProducer: PasswordProducer, keyfileLocations: List[String]): PublicKeyLogin =
     PublicKeyLogin(user, Some(passProducer), keyfileLocations)
 }
+
+case class AgentLogin(user: String, host: String) extends SshLogin
+
+object AgentLogin {
+  def apply(): AgentLogin = AgentLogin(System.getProperty("user.name"), "localhost")
+  def apply(user: String): AgentLogin = AgentLogin(user, "localhost")
+}
