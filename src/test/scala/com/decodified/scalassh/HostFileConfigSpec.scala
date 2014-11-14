@@ -30,9 +30,12 @@ class HostFileConfigSpec extends Specification {
     "encrypted PublicKeyLogin" ! {
       config("enc-keyfile.com") === Right(HostConfig(PublicKeyLogin("alice", "superSecure", "/some/file" :: Nil), "enc-keyfile.com"))
     }
+    "AgentLogin" ! {
+      config("agent.com") === Right(HostConfig(AgentLogin("bob"), "agent.com", enableCompression = true))
+    }
     "error message if the file is missing" ! {
-      config("non-existing.com").left.get === "Host resources 'non-existing.com', 'com' not found, either " +
-        "provide one or use a concrete HostConfig, PasswordLogin or PublicKeyLogin"
+      config("non-existing.net").left.get === "Host resources 'non-existing.net', 'net' not found, either " +
+        "provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin"
     }
     "error message if the login-type is invalid" ! {
       config("invalid-login-type.com").left.get must startingWith("Illegal login-type setting 'fancy pants'")

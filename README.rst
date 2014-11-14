@@ -3,7 +3,7 @@ It builds on SSHJ_ to provide the following features:
 
 * Remote execution of one or more shell commands
 * Access to ``stdin``, ``stdout``, ``stderr`` and exitcode of remote shell commands
-* Authentication via password or public key
+* Authentication via password, public key or agent
 * Host key verification via ``known_hosts`` file or explicit fingerprint
 * Convenient configuration of remote host properties via config file, resource or directly in code
 * Scala-idiomatic API
