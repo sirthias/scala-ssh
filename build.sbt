@@ -2,7 +2,7 @@ import scalariform.formatter.preferences._
 
 name := "scala-ssh"
 
-version := "0.7.0"
+version := "0.7.1"
 
 organization := "com.decodified"
 
@@ -16,12 +16,12 @@ startYear := Some(2011)
 
 licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.6"
 
 scalacOptions ++= Seq("-feature", "-language:implicitConversions", "-unchecked", "-deprecation", "-encoding", "utf8")
 
 libraryDependencies ++= Seq(
-  "net.schmizz" % "sshj" % "0.10.0",
+  "com.hierynomus" % "sshj" % "0.12.0",
   "org.slf4j" % "slf4j-api" % "1.7.7",
   "org.bouncycastle" % "bcprov-jdk16" % "1.46" % "provided",
   "com.jcraft" % "jzlib" % "1.1.3" % "provided",
