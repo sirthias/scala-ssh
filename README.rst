@@ -150,6 +150,35 @@ fingerprint
   ``~/.ssh/known_hosts2`` files will be searched for a matching entry, fingerprint verification can be entirely disabled
   by setting ``fingerprint = any``
 
+Troubleshoting
+--------------
+
+Java Cryptography Extension Policy Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To use this library it might be neccessary that you install the Java Cryptography Extension Policy
+Files from the JDK additional downloads section. Make sure they are installed, especially if you
+encounter exceptions like this:
+
+    net.schmizz.sshj.common.SSHRuntimeException: null
+            at net.schmizz.sshj.common.Buffer.readPublicKey(Buffer.java:432) ~[sshj-0.12.0.jar:na]
+            at net.schmizz.sshj.transport.kex.AbstractDHG.next(AbstractDHG.java:108) ~[sshj-0.12.0.jar:na]
+            at net.schmizz.sshj.transport.KeyExchanger.handle(KeyExchanger.java:352) ~[sshj-0.12.0.jar:na]
+            at net.schmizz.sshj.transport.TransportImpl.handle(TransportImpl.java:487) ~[sshj-0.12.0.jar:na]
+            at net.schmizz.sshj.transport.Decoder.decode(Decoder.java:107) ~[sshj-0.12.0.jar:na]
+            at net.schmizz.sshj.transport.Decoder.received(Decoder.java:175) ~[sshj-0.12.0.jar:na]
+            at net.schmizz.sshj.transport.Reader.run(Reader.java:61) ~[sshj-0.12.0.jar:na]
+    Caused by: java.security.GeneralSecurityException: java.security.spec.InvalidKeySpecException: key spec not recognised
+            at net.schmizz.sshj.common.KeyType$3.readPubKeyFromBuffer(KeyType.java:146) ~[sshj-0.12.0.jar:na]
+            at net.schmizz.sshj.common.Buffer.readPublicKey(Buffer.java:430) ~[sshj-0.12.0.jar:na]
+            ... 6 common frames omitted
+    Caused by: java.security.spec.InvalidKeySpecException: key spec not recognised
+            at org.bouncycastle.jcajce.provider.asymmetric.util.BaseKeyFactorySpi.engineGeneratePublic(Unknown Source) ~[bcprov-jdk15on-1.52.jar:1.52.0]
+            at org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi.engineGeneratePublic(Unknown Source) ~[bcprov-jdk15on-1.52.jar:1.52.0]
+            at java.security.KeyFactory.generatePublic(KeyFactory.java:334) ~[na:1.8.0_05]
+            at net.schmizz.sshj.common.KeyType$3.readPubKeyFromBuffer(KeyType.java:144) ~[sshj-0.12.0.jar:na]
+            ... 7 common frames omitted
+
 
 License
 -------
