@@ -24,7 +24,7 @@ import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
 import scala.io.Source
 
-class SshClient(val config: HostConfig) {
+class SshClient(val config: HostConfig) extends ScpTransferable {
   lazy val log = LoggerFactory.getLogger(getClass)
   lazy val endpoint = config.hostName + ':' + config.port
   lazy val authenticatedClient = connect(client).right.flatMap(authenticate)
