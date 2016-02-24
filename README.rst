@@ -196,7 +196,7 @@ Along with any patches, please state that the patch is your original work and th
 
 
 .. _Scala: http://www.scala-lang.org/
-.. _sshj: https://github.com/shikhar/sshj
+.. _sshj: https://github.com/hierynomus/sshj
 .. _SBT: https://github.com/harrah/xsbt/wiki
 .. _SLF4J: http://www.slf4j.org/
 .. _logback: http://logback.qos.ch/
