@@ -18,8 +18,10 @@ MAINTENANCE STATE
 -----------------
 
 **This project is currently unmaintained.**
-**If you would like to take over maintenance and/or further development in your own fork**
-**please let me know. I'd be happy to put up a forwarding pointer here.**
+
+However there is a fork at https://github.com/veact/scala-ssh whose owner have announced that they will continue
+development and maintenance.
+(See also issue https://github.com/sirthias/scala-ssh/issues/35)
 
 *****
 
