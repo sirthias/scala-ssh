@@ -30,14 +30,14 @@ libraryDependencies ++= Seq(
 
 resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
 
-scalariformSettings
+scalariformSettings(true)
 
-ScalariformKeys.preferences := ScalariformKeys.preferences.value
+scalariformPreferences := scalariformPreferences.value
   .setPreference(RewriteArrowSymbols, true)
   .setPreference(AlignParameters, true)
   .setPreference(AlignSingleLineCaseStatements, true)
   .setPreference(DoubleIndentClassDeclaration, true)
-  .setPreference(PreserveDanglingCloseParenthesis, true)
+  .setPreference(DanglingCloseParenthesis, Preserve)
 
 ///////////////
 // publishing
