@@ -60,12 +60,14 @@ scalafmtOnCompile := true
 scalafmtVersion := "1.4.0"
 
 libraryDependencies ++= Seq(
-  "com.hierynomus"   % "sshj"            % "0.23.0",
-  "org.slf4j"        % "slf4j-api"       % "1.7.25",
-  "org.bouncycastle" % "bcprov-jdk15on"  % "1.59"  % "provided",
-  "com.jcraft"       % "jzlib"           % "1.1.3" % "provided",
-  "ch.qos.logback"   % "logback-classic" % "1.2.3" % "test",
-  "org.scalatest"    %% "scalatest"      % "3.0.5" % "test"
+  "com.hierynomus"   % "sshj"                              % "0.23.0",
+  "org.slf4j"        % "slf4j-api"                         % "1.7.25",
+  "org.bouncycastle" % "bcprov-jdk15on"                    % "1.59" % "provided",
+  "com.jcraft"       % "jzlib"                             % "1.1.3" % "provided",
+  "com.jcraft"       % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
+  "com.jcraft"       % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
+  "ch.qos.logback"   % "logback-classic"                   % "1.2.3" % "test",
+  "org.scalatest"    %% "scalatest"                        % "3.0.5" % "test"
 )
 
 ///////////////

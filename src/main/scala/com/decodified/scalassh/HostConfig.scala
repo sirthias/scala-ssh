@@ -17,14 +17,19 @@
 package com.decodified.scalassh
 
 import net.schmizz.sshj.{Config, DefaultConfig}
+
 import io.Source
 import java.io.{File, IOException}
+
 import HostKeyVerifiers._
 import java.security.PublicKey
+
 import net.schmizz.sshj.common.SecurityUtils
 import net.schmizz.sshj.connection.channel.direct.PTYMode
 import net.schmizz.sshj.transport.verification.{HostKeyVerifier, OpenSSHKnownHosts}
+
 import annotation.tailrec
+import scala.util.control.NonFatal
 
 trait HostConfigProvider extends (String ⇒ Validated[HostConfig])
 
@@ -98,6 +103,7 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
     setting("login-type", settings, source).right.flatMap {
       case "password" ⇒ passwordLogin(settings, source)
       case "keyfile"  ⇒ keyfileLogin(settings, source)
+      case "agent"    ⇒ agentLogin(settings, source)
       case x ⇒
         Left(
           "Illegal login-type setting '%s' in host config '%s': expecting either 'password' or 'keyfile'"
@@ -127,6 +133,12 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
           .map(_.replaceFirst("^~/", System.getProperty("user.home") + '/').replace('/', File.separatorChar))
       )
     }
+
+  private def agentLogin(settings: Map[String, String], source: String): Validated[AgentLogin] = {
+    val user = setting("username", settings, source).right.toOption
+    val host = setting("host", settings, source).right.toOption
+    Right(AgentLogin(user getOrElse System.getProperty("user.home"), host getOrElse "localhost"))
+  }
 
   private def setting(key: String, settings: Map[String, String], source: String): Validated[String] =
     settings.get(key) match {
@@ -178,7 +190,7 @@ object HostFileConfig {
           case None ⇒
             Left(
               s"Host files '${locations.mkString("', '")}' not found, " +
-                "either provide one or use a concrete HostConfig, PasswordLogin or PublicKeyLogin")
+                "either provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin")
         }
       }
     }
@@ -207,7 +219,7 @@ object HostResourceConfig {
             r → {
               val inputStream = getClass.getClassLoader.getResourceAsStream(r)
               try new StreamCopier().drainToString(inputStream).split("\n").toList
-              catch { case _: Exception ⇒ null }
+              catch { case NonFatal(_) ⇒ null }
             }
           }
           .find(_._2 != null) match {
@@ -215,7 +227,7 @@ object HostResourceConfig {
           case None ⇒
             Left(
               s"Host resources '${locations.mkString("', '")}' not found, " +
-                s"either provide one or use a concrete HostConfig, PasswordLogin or PublicKeyLogin")
+                s"either provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin")
         }
       }
     }

@@ -19,12 +19,16 @@ package com.decodified.scalassh
 import java.util.concurrent.TimeUnit
 import java.io.{FileInputStream, FileNotFoundException, InputStream}
 
+import com.jcraft.jsch.agentproxy.{AgentProxy, Connector, ConnectorFactory}
+import com.jcraft.jsch.agentproxy.sshj.AuthAgent
 import org.slf4j.LoggerFactory
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
+import net.schmizz.sshj.userauth.method.AuthMethod
 
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
 import scala.util.control.NonFatal
 
 final class SshClient(val config: HostConfig) extends ScpTransferable {
@@ -105,6 +109,16 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       }
     }
 
+    def agentProxyAuthMethods: Seq[AuthMethod] = {
+      def authMethods(agent: AgentProxy): Seq[AuthMethod] = agent.getIdentities.map(new AuthAgent(agent, _))
+      val agentConnector: Try[Connector]                  = Try { ConnectorFactory.getDefault.createConnector() }
+      val agentProxy: Try[AgentProxy]                     = agentConnector map (new AgentProxy(_))
+      agentProxy map authMethods match {
+        case Success(m) ⇒ m
+        case Failure(e) ⇒ throw new RuntimeException("Agent proxy could not be initialized", e)
+      }
+    }
+
     require(client.isConnected && !client.isAuthenticated)
     log.info("Authenticating to {} using {} ...", Seq(endpoint, config.login.user): _*)
     config.login match {
@@ -116,6 +130,11 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       case PublicKeyLogin(user, passProducer, keyfileLocations) ⇒
         protect("Could not authenticate (with keyfile) to") {
           client.authPublickey(user, keyProviders(keyfileLocations, passProducer.orNull): _*)
+          client
+        }
+      case AgentLogin(user, _) ⇒
+        protect("Could not authenticate (with agent proxy) to") {
+          client.auth(user, agentProxyAuthMethods: _*)
           client
         }
     }

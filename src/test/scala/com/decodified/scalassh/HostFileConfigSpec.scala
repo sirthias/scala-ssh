@@ -39,6 +39,10 @@ class HostFileConfigSpec extends FreeSpec with Matchers {
         HostConfig(PublicKeyLogin("alice", "superSecure", "/some/file" :: Nil), "enc-keyfile.com"))
     }
 
+    "AgentLogin" in {
+      config("agent.com") shouldEqual Right(HostConfig(AgentLogin("bob"), "agent.com", enableCompression = true))
+    }
+
     "error message if the file is missing" in {
       config("non-existing.com").left.get shouldEqual
       ("Host resources 'non-existing.com', 'com' not found, " +
