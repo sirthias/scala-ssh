@@ -17,7 +17,7 @@
 package com.decodified.scalassh
 
 import java.util.concurrent.TimeUnit
-import java.io.{ InputStream, FileNotFoundException, FileInputStream }
+import java.io.{FileInputStream, FileNotFoundException, InputStream}
 import org.slf4j.LoggerFactory
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
@@ -25,20 +25,19 @@ import net.schmizz.sshj.userauth.keyprovider.KeyProvider
 import scala.io.Source
 
 class SshClient(val config: HostConfig) extends ScpTransferable {
-  lazy val log = LoggerFactory.getLogger(getClass)
-  lazy val endpoint = config.hostName + ':' + config.port
+  lazy val log                 = LoggerFactory.getLogger(getClass)
+  lazy val endpoint            = config.hostName + ':' + config.port
   lazy val authenticatedClient = connect(client).right.flatMap(authenticate)
-  val client = createClient(config)
+  val client                   = createClient(config)
 
-  def exec(command: Command): Validated[CommandResult] = {
+  def exec(command: Command): Validated[CommandResult] =
     authenticatedClient.right.flatMap { client ⇒
       startSession(client).right.flatMap { session ⇒
         execWithSession(command, session)
       }
     }
-  }
 
-  def execPTY(command: Command): Validated[CommandResult] = {
+  def execPTY(command: Command): Validated[CommandResult] =
     authenticatedClient.right.flatMap { client ⇒
       startSession(client).right.flatMap { session ⇒
         config.ptyConfig.fold { session.allocateDefaultPTY() } { ptyConf ⇒
@@ -47,7 +46,6 @@ class SshClient(val config: HostConfig) extends ScpTransferable {
         execWithSession(command, session)
       }
     }
-  }
 
   def execWithSession(command: Command, session: Session): Validated[CommandResult] = {
     log.info("Executing SSH command on {}: \"{}\"", Seq(endpoint, command.command): _*)
@@ -85,7 +83,9 @@ class SshClient(val config: HostConfig) extends ScpTransferable {
         if (location.startsWith("classpath:")) {
           val resource = location.substring("classpath:".length)
           Option(getClass.getClassLoader.getResourceAsStream(resource))
-            .orElse(throw new RuntimeException("Classpath resource '" + resource + "' containing private key could not be found"))
+            .orElse(
+              throw new RuntimeException(
+                "Classpath resource '" + resource + "' containing private key could not be found"))
         } else {
           try Some(new FileInputStream(location))
           catch { case _: FileNotFoundException ⇒ None }
@@ -130,14 +130,11 @@ class SshClient(val config: HostConfig) extends ScpTransferable {
     client.close()
   }
 
-  protected def protect[T](errorMsg: ⇒ String)(f: ⇒ T): Validated[T] = {
-    try { Right(f) }
-    catch { case e: Exception ⇒ Left("%s %s due to %s".format(errorMsg, endpoint, e)) }
-  }
+  protected def protect[T](errorMsg: ⇒ String)(f: ⇒ T): Validated[T] =
+    try { Right(f) } catch { case e: Exception ⇒ Left("%s %s due to %s".format(errorMsg, endpoint, e)) }
 }
 
 object SshClient {
-  def apply(host: String, configProvider: HostConfigProvider = HostFileConfig()): Validated[SshClient] = {
+  def apply(host: String, configProvider: HostConfigProvider = HostFileConfig()): Validated[SshClient] =
     configProvider(host).right.map(new SshClient(_))
-  }
 }

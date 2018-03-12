@@ -17,7 +17,8 @@ trait ScpTransferable {
       }
     }
 
-  def fileTransfer[T](fun: SCPFileTransfer ⇒ T)(implicit listener: TransferListener = new LoggingTransferListener()): Validated[T] =
+  def fileTransfer[T](fun: SCPFileTransfer ⇒ T)(
+      implicit listener: TransferListener = new LoggingTransferListener()): Validated[T] =
     authenticatedClient.right.flatMap { client ⇒
       protect("SCP file transfer failed") {
         val transfer = client.newSCPFileTransfer()
@@ -26,9 +27,11 @@ trait ScpTransferable {
       }
     }
 
-  def upload(localPath: String, remotePath: String)(implicit listener: TransferListener = new LoggingTransferListener()): Validated[Unit] =
+  def upload(localPath: String, remotePath: String)(
+      implicit listener: TransferListener = new LoggingTransferListener()): Validated[Unit] =
     fileTransfer(_.upload(localPath, remotePath))(listener)
 
-  def download(remotePath: String, localPath: String)(implicit listener: TransferListener = new LoggingTransferListener()): Validated[Unit] =
+  def download(remotePath: String, localPath: String)(implicit listener: TransferListener =
+                                                        new LoggingTransferListener()): Validated[Unit] =
     fileTransfer(_.download(remotePath, localPath))(listener)
 }

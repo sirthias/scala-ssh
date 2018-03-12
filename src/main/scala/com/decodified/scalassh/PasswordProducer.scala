@@ -16,7 +16,7 @@
 
 package com.decodified.scalassh
 
-import net.schmizz.sshj.userauth.password.{ Resource, PasswordFinder }
+import net.schmizz.sshj.userauth.password.{PasswordFinder, Resource}
 
 trait PasswordProducer extends PasswordFinder
 
@@ -33,4 +33,3 @@ object PasswordProducer {
     def shouldRetry(resource: Resource[_]) = false
   }
 }
-

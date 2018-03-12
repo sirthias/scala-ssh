@@ -24,10 +24,8 @@ sealed trait SshLogin {
 
 case class PasswordLogin(user: String, passProducer: PasswordProducer) extends SshLogin
 
-case class PublicKeyLogin(
-  user: String,
-  passProducer: Option[PasswordProducer],
-  keyfileLocations: List[String]) extends SshLogin
+case class PublicKeyLogin(user: String, passProducer: Option[PasswordProducer], keyfileLocations: List[String])
+    extends SshLogin
 
 object PublicKeyLogin {
   lazy val DefaultKeyLocations = "~/.ssh/id_rsa" :: "~/.ssh/id_dsa" :: Nil

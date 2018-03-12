@@ -17,7 +17,7 @@
 package com.decodified.scalassh
 
 import annotation.tailrec
-import java.io.{ ByteArrayOutputStream, OutputStream, InputStream }
+import java.io.{ByteArrayOutputStream, InputStream, OutputStream}
 
 final class StreamCopier(bufferSize: Int = 4096) {
   private val buffer = new Array[Byte](bufferSize)
@@ -34,9 +34,8 @@ final class StreamCopier(bufferSize: Int = 4096) {
     }
   }
 
-  def emptyToString(inputStream: InputStream, charset: String = "UTF8") = {
+  def emptyToString(inputStream: InputStream, charset: String = "UTF8") =
     new String(emptyToByteArray(inputStream), charset)
-  }
 
   def emptyToByteArray(inputStream: InputStream) = {
     val output = new ByteArrayOutputStream()
@@ -44,4 +43,3 @@ final class StreamCopier(bufferSize: Int = 4096) {
     output.toByteArray
   }
 }
-
