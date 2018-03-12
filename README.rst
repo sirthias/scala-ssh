@@ -14,35 +14,24 @@ It builds on SSHJ_ to provide the following features:
 
 *****
 
-MAINTENANCE STATE
------------------
-
-**This project is currently unmaintained.**
-
-However there is a fork at https://github.com/veact/scala-ssh whose owner have announced that they will continue
-development and maintenance.
-(See also issue https://github.com/sirthias/scala-ssh/issues/35)
-
-*****
-
 Installation
 ------------
 
-The latest release is **0.7.0** and is built against Scala 2.10 and Scala 2.11.
+The latest release is **0.8.0** and is built against Scala 2.10, 2.11 and 2.12.
 It is available from Maven Central. If you use SBT_ you can pull in the *scala-ssh* artifacts with::
 
-    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.7.0"
+    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.8.0"
 
 SSHJ_ uses SLF4J_ for logging, so you might want to also add logback_ to your dependencies::
 
-    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 
-Additionally, in many cases you will need the following two artifacts, which provide additional cypher and compression
-support::
+Additionally, in many cases you will need the following two artifacts,
+which provide additional cypher and compression support::
 
     libraryDependencies ++= Seq(
-      "org.bouncycastle" % "bcprov-jdk16" % "1.46",
-      "com.jcraft" % "jzlib" % "1.1.3"
+      "org.bouncycastle" % "bcprov-jdk15on"  % "1.59",
+      "com.jcraft"       % "jzlib"           % "1.1.3"
     )
 
 
@@ -104,8 +93,8 @@ This means that for a host with name ``node42.tier1.example.com`` the following 
 Host Config File Format
 -----------------------
 
-A host config file is a UTF8-encoded text file containing ``key = value`` pairs, one per line. Blank lines and lines
-starting with a ``#`` character are ignored. This is an example file::
+A host config file is a UTF8-encoded text file containing ``key = value`` pairs, one per line.
+Blank lines and lines starting with a ``#`` character are ignored. This is an example file::
 
     # simple password-based config
     login-type = password
@@ -169,7 +158,7 @@ Troubleshoting
 Java Cryptography Extension Policy Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To use this library it might be neccessary that you install the Java Cryptography Extension Policy
+To use this library it might be necessary that you install the Java Cryptography Extension Policy
 Files from the JDK additional downloads section. Make sure they are installed, especially if you
 encounter exceptions like this:
 

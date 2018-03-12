@@ -18,13 +18,16 @@ package com.decodified.scalassh
 
 import java.util.concurrent.TimeUnit
 import java.io.{FileInputStream, FileNotFoundException, InputStream}
+
 import org.slf4j.LoggerFactory
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
-import scala.io.Source
 
-class SshClient(val config: HostConfig) extends ScpTransferable {
+import scala.io.Source
+import scala.util.control.NonFatal
+
+final class SshClient(val config: HostConfig) extends ScpTransferable {
   lazy val log                 = LoggerFactory.getLogger(getClass)
   lazy val endpoint            = config.hostName + ':' + config.port
   lazy val authenticatedClient = connect(client).right.flatMap(authenticate)
@@ -40,7 +43,7 @@ class SshClient(val config: HostConfig) extends ScpTransferable {
   def execPTY(command: Command): Validated[CommandResult] =
     authenticatedClient.right.flatMap { client ⇒
       startSession(client).right.flatMap { session ⇒
-        config.ptyConfig.fold { session.allocateDefaultPTY() } { ptyConf ⇒
+        config.ptyConfig.fold(session.allocateDefaultPTY()) { ptyConf ⇒
           session.allocatePTY(ptyConf.term, ptyConf.cols, ptyConf.rows, ptyConf.width, ptyConf.height, ptyConf.modes)
         }
         execWithSession(command, session)
@@ -53,7 +56,7 @@ class SshClient(val config: HostConfig) extends ScpTransferable {
       val channel = session.exec(command.command)
       command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
       command.timeout orElse config.commandTimeout match {
-        case Some(timeout) ⇒ channel.join(timeout, TimeUnit.MILLISECONDS)
+        case Some(timeout) ⇒ channel.join(timeout.toLong, TimeUnit.MILLISECONDS)
         case None          ⇒ channel.join()
       }
       new CommandResult(channel)
@@ -125,13 +128,14 @@ class SshClient(val config: HostConfig) extends ScpTransferable {
     }
   }
 
-  def close() {
+  def close(): Unit = {
     log.info("Closing connection to {} ...", endpoint)
     client.close()
   }
 
   protected def protect[T](errorMsg: ⇒ String)(f: ⇒ T): Validated[T] =
-    try { Right(f) } catch { case e: Exception ⇒ Left("%s %s due to %s".format(errorMsg, endpoint, e)) }
+    try Right(f)
+    catch { case NonFatal(e) ⇒ Left(s"$errorMsg $endpoint due to $e") }
 }
 
 object SshClient {

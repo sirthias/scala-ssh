@@ -42,22 +42,16 @@ scalacOptions := {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 12)) ⇒
       orig.map {
-        case "-Xlint" ⇒ "-Xlint:-unused,_"
-        case "-Ywarn-unused-import" ⇒
-          "-Ywarn-unused:imports,-patvars,-privates,-locals,-implicits,-explicits"
-        case other ⇒ other
+        case "-Ywarn-unused-import" ⇒ "-Ywarn-unused:imports,-patvars,-privates,-locals,-implicits,-explicits"
+        case other                  ⇒ other
       }
     case Some((2, 11)) ⇒
       orig.map {
         case "-Xsource:2.13" ⇒ ""
         case other           ⇒ other
       }
-    case Some((2, 10)) ⇒
-      orig.map {
-        case "-Xsource:2.13" ⇒ ""
-        case other           ⇒ other
-      }
-    case _ ⇒ throw new UnsupportedOperationException("unsupported version")
+    case Some((2, 10)) ⇒ orig.takeWhile(x ⇒ !x.startsWith("-Xlint")) ++ Seq("-Xlint")
+    case _             ⇒ throw new UnsupportedOperationException("unsupported version")
   }
 }
 
@@ -68,7 +62,7 @@ scalafmtVersion := "1.4.0"
 libraryDependencies ++= Seq(
   "com.hierynomus"   % "sshj"            % "0.23.0",
   "org.slf4j"        % "slf4j-api"       % "1.7.25",
-  "org.bouncycastle" % "bcprov-jdk15on"  % "1.59" % "provided",
+  "org.bouncycastle" % "bcprov-jdk15on"  % "1.59"  % "provided",
   "com.jcraft"       % "jzlib"           % "1.1.3" % "provided",
   "ch.qos.logback"   % "logback-classic" % "1.2.3" % "test",
   "org.scalatest"    %% "scalatest"      % "3.0.5" % "test"

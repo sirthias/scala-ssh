@@ -16,46 +16,59 @@
 
 package com.decodified.scalassh
 
-import org.specs2.mutable.Specification
+import org.scalatest.{FreeSpec, Matchers}
 
-class HostFileConfigSpec extends Specification {
+class HostFileConfigSpec extends FreeSpec with Matchers {
 
-  "Depending on the host file the HostFileConfig should produce a proper" >> {
-    "PasswordLogin" ! {
-      config("password.com") === Right(HostConfig(PasswordLogin("bob", "123"), "password.com", enableCompression = true))
+  val config = HostResourceConfig()
+
+  "Depending on the host file the HostFileConfig should produce a proper" - {
+
+    "PasswordLogin" in {
+      config("password.com") shouldEqual Right(
+        HostConfig(PasswordLogin("bob", "123"), "password.com", enableCompression = true))
     }
-    "unencrypted PublicKeyLogin" ! {
-      config("keyfile.com") === Right(HostConfig(PublicKeyLogin("alice", "/some/file"), "xyz.special.com", port = 30))
+
+    "unencrypted PublicKeyLogin" in {
+      config("keyfile.com") shouldEqual Right(
+        HostConfig(PublicKeyLogin("alice", "/some/file"), "xyz.special.com", port = 30))
     }
-    "encrypted PublicKeyLogin" ! {
-      config("enc-keyfile.com") === Right(HostConfig(PublicKeyLogin("alice", "superSecure", "/some/file" :: Nil), "enc-keyfile.com"))
+
+    "encrypted PublicKeyLogin" in {
+      config("enc-keyfile.com") shouldEqual Right(
+        HostConfig(PublicKeyLogin("alice", "superSecure", "/some/file" :: Nil), "enc-keyfile.com"))
     }
-    "error message if the file is missing" ! {
-      config("non-existing.com").left.get === "Host resources 'non-existing.com', 'com' not found, either " +
-        "provide one or use a concrete HostConfig, PasswordLogin or PublicKeyLogin"
+
+    "error message if the file is missing" in {
+      config("non-existing.com").left.get shouldEqual
+      ("Host resources 'non-existing.com', 'com' not found, " +
+      "either provide one or use a concrete HostConfig, PasswordLogin or PublicKeyLogin")
     }
-    "error message if the login-type is invalid" ! {
-      config("invalid-login-type.com").left.get must startingWith("Illegal login-type setting 'fancy pants'")
+
+    "error message if the login-type is invalid" in {
+      config("invalid-login-type.com").left.get should startWith("Illegal login-type setting 'fancy pants'")
     }
-    "error message if the username is missing" ! {
-      config("missing-user.com").left.get must endWith("is missing required setting 'username'")
+
+    "error message if the username is missing" in {
+      config("missing-user.com").left.get should endWith("is missing required setting 'username'")
     }
-    "error message if the host file contains an illegal line" ! {
-      config("illegal-line.com").left.get must endWith("contains illegal line:\nthis line triggers an error!")
+
+    "error message if the host file contains an illegal line" in {
+      config("illegal-line.com").left.get should endWith("contains illegal line:\nthis line triggers an error!")
     }
   }
 
-  "The sequence of searched config locations for host `node42.tier1.example.com`" should
-    "be as described in the README" ! {
-      HostFileConfig.searchLocations("node42.tier1.example.com").toList ===
-        "node42.tier1.example.com" ::
-        "node4X.tier1.example.com" ::
-        "nodeXX.tier1.example.com" ::
-        "tier1.example.com" ::
-        "tierX.example.com" ::
-        "example.com" ::
-        "com" :: Nil
+  "The sequence of searched config locations for host `node42.tier1.example.com` should" - {
+    "be as described in the README" in {
+      HostFileConfig.searchLocations("node42.tier1.example.com").toList shouldEqual
+      List(
+        "node42.tier1.example.com",
+        "node4X.tier1.example.com",
+        "nodeXX.tier1.example.com",
+        "tier1.example.com",
+        "tierX.example.com",
+        "example.com",
+        "com")
     }
-
-  val config = HostResourceConfig()
+  }
 }

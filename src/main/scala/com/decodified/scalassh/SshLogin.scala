@@ -16,19 +16,17 @@
 
 package com.decodified.scalassh
 
-import java.io.File
-
 sealed trait SshLogin {
   def user: String
 }
 
-case class PasswordLogin(user: String, passProducer: PasswordProducer) extends SshLogin
+final case class PasswordLogin(user: String, passProducer: PasswordProducer) extends SshLogin
 
-case class PublicKeyLogin(user: String, passProducer: Option[PasswordProducer], keyfileLocations: List[String])
+final case class PublicKeyLogin(user: String, passProducer: Option[PasswordProducer], keyfileLocations: List[String])
     extends SshLogin
 
 object PublicKeyLogin {
-  lazy val DefaultKeyLocations = "~/.ssh/id_rsa" :: "~/.ssh/id_dsa" :: Nil
+  val DefaultKeyLocations: List[String] = "~/.ssh/id_rsa" :: "~/.ssh/id_dsa" :: Nil
   def apply(user: String): PublicKeyLogin =
     apply(user, None, DefaultKeyLocations)
   def apply(user: String, keyfileLocations: String*): PublicKeyLogin =
