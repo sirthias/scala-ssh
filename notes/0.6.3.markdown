@@ -1,6 +1,0 @@
-This is a minor improvements release.
-Changes since 0.6.2:
-
-- Upgraded to sshj 0.8.1 and slf4j 1.7.2
-- Cross-published against Scala 2.9.2 and Scala 2.10.0-RC1
-- Added support for `fingerprint = any` host config setting
