@@ -83,3 +83,23 @@ pomIncludeRepository := { _ ⇒
   false
 }
 publishTo := sonatypePublishTo.value
+
+import ReleaseTransformations._
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+releaseCrossBuild := true
+Seq(
+  releaseCrossBuild := true,
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    runClean,
+    runTest,
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    publishArtifacts,
+    setNextVersion,
+    commitNextVersion,
+    releaseStepCommand("sonatypeReleaseAll"),
+    pushChanges))
