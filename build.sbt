@@ -3,7 +3,6 @@ enablePlugins(AutomateHeaderPlugin)
 
 name := "scala-ssh"
 description := "A Scala library providing remote shell access via SSH"
-version := "0.8.0"
 organization := "com.decodified"
 organizationHomepage := Some(new URL("http://decodified.com"))
 homepage := Some(new URL("https://github.com/sirthias/scala-ssh"))
