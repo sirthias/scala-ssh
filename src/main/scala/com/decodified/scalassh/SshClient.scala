@@ -68,8 +68,6 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
     }
   }
 
-  def newSCPFileTransfer: SCPFileTransfer = client.newSCPFileTransfer()
-
   protected def createClient(config: HostConfig): SSHClient =
     make(new SSHClient(config.sshjConfig)) { client ⇒
       config.connectTimeout.foreach(client.setConnectTimeout)
