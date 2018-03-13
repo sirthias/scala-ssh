@@ -1,4 +1,6 @@
 // basic
+enablePlugins(AutomateHeaderPlugin)
+
 name := "scala-ssh"
 description := "A Scala library providing remote shell access via SSH"
 version := "0.8.0"
@@ -7,6 +9,7 @@ organizationHomepage := Some(new URL("http://decodified.com"))
 homepage := Some(new URL("https://github.com/sirthias/scala-ssh"))
 startYear := Some(2011)
 licenses := Seq("Apache 2" → new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+headerLicense := Some(HeaderLicense.ALv2("2011-2018", "Mathias Doenitz"))
 scmInfo := Some(ScmInfo(url("https://github.com/sirthias/scala-ssh"), "scm:git:git@github.com:sirthias/scala-ssh.git"))
 developers := List(
   Developer(id = "sirthias", name = "Mathias Doenitz", email = "", url = url("http://github.com/sirthias")))
