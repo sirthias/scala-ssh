@@ -16,13 +16,16 @@
 
 package com.decodified.scalassh
 
+import scala.util.control.NonFatal
+
 object SSH {
+
   def apply[T](host: String, configProvider: HostConfigProvider = HostFileConfig())(
       body: SshClient ⇒ Result[T]): Validated[T] =
     SshClient(host, configProvider).right.flatMap { client ⇒
       val result = {
         try body(client).result
-        catch { case e: Exception ⇒ Left(e.toString) }
+        catch { case NonFatal(e) ⇒ Left(e.toString) }
       }
       client.close()
       result

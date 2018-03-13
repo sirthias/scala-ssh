@@ -20,9 +20,9 @@ import scala.annotation.tailrec
 import java.io.{ByteArrayOutputStream, InputStream, OutputStream}
 
 final class StreamCopier(bufferSize: Int = 4096) {
-  private val buffer = new Array[Byte](bufferSize)
 
   def copy(in: InputStream, out: OutputStream): Unit = {
+    val buffer = new Array[Byte](bufferSize)
     @tailrec def rec(): Unit = {
       val bytes = in.read(buffer)
       if (bytes > 0) {

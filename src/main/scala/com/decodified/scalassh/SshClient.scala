@@ -26,6 +26,7 @@ import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
 import net.schmizz.sshj.userauth.method.AuthMethod
+import net.schmizz.sshj.xfer.scp.SCPFileTransfer
 
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -66,6 +67,8 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       new CommandResult(channel)
     }
   }
+
+  def newSCPFileTransfer: SCPFileTransfer = client.newSCPFileTransfer()
 
   protected def createClient(config: HostConfig): SSHClient =
     make(new SSHClient(config.sshjConfig)) { client ⇒

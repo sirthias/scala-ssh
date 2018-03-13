@@ -11,7 +11,7 @@ scmInfo := Some(ScmInfo(url("https://github.com/sirthias/scala-ssh"), "scm:git:g
 developers := List(
   Developer(id = "sirthias", name = "Mathias Doenitz", email = "", url = url("http://github.com/sirthias")))
 
-scalaVersion := "2.11.12"
+scalaVersion := "2.12.4"
 
 javacOptions ++= Seq("-encoding", "UTF-8", "-source", "1.7", "-target", "1.7", "-Xlint:unchecked", "-Xlint:deprecation")
 
@@ -60,14 +60,12 @@ scalafmtOnCompile := true
 scalafmtVersion := "1.4.0"
 
 libraryDependencies ++= Seq(
-  "com.hierynomus"   % "sshj"                              % "0.23.0",
-  "org.slf4j"        % "slf4j-api"                         % "1.7.25",
-  "org.bouncycastle" % "bcprov-jdk15on"                    % "1.59" % "provided",
-  "com.jcraft"       % "jzlib"                             % "1.1.3" % "provided",
-  "com.jcraft"       % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
-  "com.jcraft"       % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
-  "ch.qos.logback"   % "logback-classic"                   % "1.2.3" % "test",
-  "org.scalatest"    %% "scalatest"                        % "3.0.5" % "test"
+  "com.hierynomus" % "sshj"                              % "0.23.0",
+  "org.slf4j"      % "slf4j-api"                         % "1.7.25",
+  "com.jcraft"     % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
+  "com.jcraft"     % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
+  "ch.qos.logback" % "logback-classic"                   % "1.2.3" % "test",
+  "org.scalatest"  %% "scalatest"                        % "3.0.5" % "test"
 )
 
 ///////////////

@@ -46,7 +46,7 @@ class HostFileConfigSpec extends FreeSpec with Matchers {
     "error message if the file is missing" in {
       config("non-existing.com").left.get shouldEqual
       ("Host resources 'non-existing.com', 'com' not found, " +
-      "either provide one or use a concrete HostConfig, PasswordLogin or PublicKeyLogin")
+      "either provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin")
     }
 
     "error message if the login-type is invalid" in {

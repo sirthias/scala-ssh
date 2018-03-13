@@ -26,14 +26,6 @@ SSHJ_ uses SLF4J_ for logging, so you might want to also add logback_ to your de
 
     libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 
-Additionally, in many cases you will need the following two artifacts,
-which provide additional cypher and compression support::
-
-    libraryDependencies ++= Seq(
-      "org.bouncycastle" % "bcprov-jdk15on"  % "1.59",
-      "com.jcraft"       % "jzlib"           % "1.1.3"
-    )
-
 
 Usage
 -----

@@ -212,17 +212,19 @@ object HostResourceConfig {
   def apply(): HostConfigProvider = apply("")
   def apply(resourceBase: String): HostConfigProvider =
     new FromStringsHostConfigProvider {
-      protected def rawLines(host: String) = {
+      protected def rawLines(host: String): Validated[(String, TraversableOnce[String])] = {
         val locations = HostFileConfig.searchLocations(host).map(resourceBase + _)
         locations
-          .map { r ⇒
-            r → {
-              val inputStream = getClass.getClassLoader.getResourceAsStream(r)
-              try new StreamCopier().drainToString(inputStream).split("\n").toList
-              catch { case NonFatal(_) ⇒ null }
+          .map { location ⇒
+            location → {
+              val inputStream = getClass.getClassLoader.getResourceAsStream(location)
+              if (inputStream ne null) {
+                try new StreamCopier().drainToString(inputStream).split("\n").toList.filter(_.nonEmpty)
+                catch { case NonFatal(_) ⇒ Nil }
+              } else Nil
             }
           }
-          .find(_._2 != null) match {
+          .find(_._2.nonEmpty) match {
           case Some(result) ⇒ Right(result)
           case None ⇒
             Left(
@@ -250,7 +252,7 @@ object HostKeyVerifiers {
   def fromKnownHostsFile(knownHostsFile: File): Validated[HostKeyVerifier] =
     if (knownHostsFile.exists()) {
       try Right(new OpenSSHKnownHosts(knownHostsFile))
-      catch { case e: Exception ⇒ Left(s"Could not read $knownHostsFile due to $e") }
+      catch { case NonFatal(e) ⇒ Left(s"Could not read $knownHostsFile due to $e") }
     } else Left(knownHostsFile.toString + " not found")
 
   def forFingerprint(fingerprint: String): HostKeyVerifier =
