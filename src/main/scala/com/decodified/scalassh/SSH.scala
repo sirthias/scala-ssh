@@ -16,27 +16,26 @@
 
 package com.decodified.scalassh
 
-import scala.util.control.NonFatal
+import scala.util.control.{NoStackTrace, NonFatal}
+import scala.util.{Failure, Success, Try}
 
 object SSH {
 
   def apply[T](host: String, configProvider: HostConfigProvider = HostFileConfig())(
-      body: SshClient ⇒ Result[T]): Validated[T] =
-    SshClient(host, configProvider).right.flatMap { client ⇒
-      val result = {
-        try body(client).result
-        catch { case NonFatal(e) ⇒ Left(e.toString) }
-      }
-      client.close()
-      result
+      body: SshClient ⇒ Result[T]): Try[T] =
+    SshClient(host, configProvider).flatMap { client ⇒
+      try body(client).result
+      catch { case NonFatal(e) ⇒ Failure(e) } finally client.close()
     }
 
-  final case class Result[T](result: Validated[T])
+  final case class Result[T](result: Try[T])
 
   object Result extends LowerPriorityImplicits {
-    implicit def fromValidated[T](value: Validated[T]) = Result(value)
+    implicit def fromTry[T](value: Try[T]) = Result(value)
   }
   private[SSH] abstract class LowerPriorityImplicits {
-    implicit def fromAny[T](value: T) = Result(Right(value))
+    implicit def fromAny[T](value: T) = Result(Success(value))
   }
+
+  final case class Error(msg: String, cause: Throwable = null) extends RuntimeException(msg, cause) with NoStackTrace
 }

@@ -18,6 +18,8 @@ package com.decodified.scalassh
 
 import org.scalatest.{FreeSpec, Matchers}
 
+import scala.util.{Failure, Success}
+
 class HostFileConfigSpec extends FreeSpec with Matchers {
 
   val config = HostResourceConfig()
@@ -25,40 +27,44 @@ class HostFileConfigSpec extends FreeSpec with Matchers {
   "Depending on the host file the HostFileConfig should produce a proper" - {
 
     "PasswordLogin" in {
-      config("password.com") shouldEqual Right(
+      config("password.com") shouldEqual Success(
         HostConfig(PasswordLogin("bob", "123"), "password.com", enableCompression = true))
     }
 
     "unencrypted PublicKeyLogin" in {
-      config("keyfile.com") shouldEqual Right(
+      config("keyfile.com") shouldEqual Success(
         HostConfig(PublicKeyLogin("alice", "/some/file"), "xyz.special.com", port = 30))
     }
 
     "encrypted PublicKeyLogin" in {
-      config("enc-keyfile.com") shouldEqual Right(
+      config("enc-keyfile.com") shouldEqual Success(
         HostConfig(PublicKeyLogin("alice", "superSecure", "/some/file" :: Nil), "enc-keyfile.com"))
     }
 
     "AgentLogin" in {
-      config("agent.com") shouldEqual Right(HostConfig(AgentLogin("bob"), "agent.com", enableCompression = true))
+      config("agent.com") shouldEqual Success(HostConfig(AgentLogin("bob"), "agent.com", enableCompression = true))
     }
 
     "error message if the file is missing" in {
-      config("non-existing.com").left.get shouldEqual
-      ("Host resources 'non-existing.com', 'com' not found, " +
-      "either provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin")
+      config("non-existing.com") shouldEqual
+      Failure(
+        SSH.Error("Host resources 'non-existing.com', 'com' not found, " +
+          "either provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin"))
     }
 
     "error message if the login-type is invalid" in {
-      config("invalid-login-type.com").left.get should startWith("Illegal login-type setting 'fancy pants'")
+      config("invalid-login-type.com") shouldEqual Failure(SSH.Error(
+        "Illegal login-type setting 'fancy pants' in host config 'invalid-login-type.com': expecting either 'password', 'keyfile' or 'agent'"))
     }
 
     "error message if the username is missing" in {
-      config("missing-user.com").left.get should endWith("is missing required setting 'username'")
+      config("missing-user.com") shouldEqual Failure(
+        SSH.Error("Host config 'missing-user.com' is missing required setting 'username'"))
     }
 
     "error message if the host file contains an illegal line" in {
-      config("illegal-line.com").left.get should endWith("contains illegal line:\nthis line triggers an error!")
+      config("illegal-line.com") shouldEqual Failure(
+        SSH.Error("Host config 'illegal-line.com' contains illegal line:\nthis line triggers an error!"))
     }
   }
 

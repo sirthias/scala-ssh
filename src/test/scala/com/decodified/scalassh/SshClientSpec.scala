@@ -23,6 +23,7 @@ import org.scalatest.{FreeSpec, Matchers}
 
 import io.Source
 import Source.{fromFile ⇒ open}
+import scala.util.Success
 import scala.util.control.NonFatal
 
 class SshClientSpec extends FreeSpec with Matchers {
@@ -46,52 +47,48 @@ class SshClientSpec extends FreeSpec with Matchers {
 
     "properly connect to the test host and fetch a directory listing" in {
       SSH(testHostName) { client ⇒
-        client.exec("ls -a").right.map { result ⇒
-          result.stdOutAsString() + "|" + result.stdErrAsString()
-        }
-      }.right.get should startWith(".\n..\n")
+        client.exec("ls -a").map(result ⇒ result.stdOutAsString() + "|" + result.stdErrAsString())
+      }.get should startWith(".\n..\n")
     }
 
     "properly connect to the test host and execute three independent commands" in {
       SSH(testHostName) { client ⇒
-        client.exec("ls").right.flatMap { res1 ⇒
-          println("OK 1")
-          client.exec("dfssgsdg").right.flatMap { res2 ⇒
-            println("OK 2")
-            client.exec("uname").right.map { res3 ⇒
-              println("OK 3")
-              (res1.exitCode, res2.exitCode, res3.exitCode)
-            }
-          }
-        }
-      } shouldEqual Right((Some(0), Some(127), Some(0)))
+        for {
+          res1 ← client.exec("ls")
+          _ = println("OK 1")
+          res2 ← client.exec("dfssgsdg")
+          _ = println("OK 2")
+          res3 ← client.exec("uname")
+          _ = println("OK 3")
+        } yield (res1.exitCode, res2.exitCode, res3.exitCode)
+      } shouldEqual Success((Some(0), Some(127), Some(0)))
     }
 
     "properly upload to the test host" in {
-      val testFile = make(new File(testFileName)) { file ⇒
-        val writer = new FileWriter(file)
-        writer.write(testText)
-        writer.close()
-      }
+      val testFile = new File(testFileName)
+      val writer   = new FileWriter(testFile)
+      writer.write(testText)
+      writer.close()
 
-      SSH(testHostName) { client ⇒
-        try client.upload(testFile.getAbsolutePath, testFileName).right.flatMap { _ ⇒
-          client.exec("cat " + testFileName).right.map { result ⇒
-            testFile.delete()
-            result.stdOutAsString()
-          }
-        } finally client.close()
-      } shouldEqual Right(testText)
+      try {
+        SSH(testHostName) { client ⇒
+          for {
+            _      ← client.upload(testFile.getAbsolutePath, testFileName)
+            result ← client.exec("cat " + testFileName)
+          } yield result.stdOutAsString()
+        } shouldEqual Success(testText)
+      } finally testFile.delete()
     }
 
-    "properly download to the test host" in {
+    "properly download from the test host" in {
       SSH(testHostName) { client ⇒
-        try client.download(testFileName, testFileName).right.map { _ ⇒
-          make(open(testFileName).getLines.mkString) { _ ⇒
-            new File(testFileName).delete()
-          }
-        } finally client.close()
-      } shouldEqual Right(testText)
+        for {
+          _ ← client.download(testFileName, testFileName)
+        } yield {
+          try open(testFileName).getLines.mkString
+          finally new File(testFileName).delete()
+        }
+      } shouldEqual Success(testText)
     }
   }
 }

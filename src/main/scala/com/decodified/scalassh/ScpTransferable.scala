@@ -21,12 +21,13 @@ import net.schmizz.sshj.sftp.SFTPClient
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer
 import net.schmizz.sshj.xfer.TransferListener
 import net.schmizz.sshj.xfer.LoggingTransferListener
+import scala.util.Try
 
 abstract class ScpTransferable {
   self: SshClient ⇒
 
-  def sftp[T](fun: SFTPClient ⇒ T): Validated[T] =
-    authenticatedClient.right.flatMap { client ⇒
+  def sftp[T](fun: SFTPClient ⇒ T): Try[T] =
+    authenticatedClient.flatMap { client ⇒
       protect("SFTP client failed") {
         val ftpClient = client.newSFTPClient()
         try fun(ftpClient)
@@ -34,8 +35,8 @@ abstract class ScpTransferable {
       }
     }
 
-  def fileTransfer[T](fun: SCPFileTransfer ⇒ T)(implicit l: TransferListener = defaultListener): Validated[T] =
-    authenticatedClient.right.flatMap { client ⇒
+  def fileTransfer[T](fun: SCPFileTransfer ⇒ T)(implicit l: TransferListener = defaultListener): Try[T] =
+    authenticatedClient.flatMap { client ⇒
       protect("SCP file transfer failed") {
         val transfer = client.newSCPFileTransfer()
         transfer.setTransferListener(l)
@@ -43,10 +44,10 @@ abstract class ScpTransferable {
       }
     }
 
-  def upload(localPath: String, remotePath: String)(implicit l: TransferListener = defaultListener): Validated[Unit] =
+  def upload(localPath: String, remotePath: String)(implicit l: TransferListener = defaultListener): Try[Unit] =
     fileTransfer(_.upload(localPath, remotePath))(l)
 
-  def download(remotePath: String, localPath: String)(implicit l: TransferListener = defaultListener): Validated[Unit] =
+  def download(remotePath: String, localPath: String)(implicit l: TransferListener = defaultListener): Try[Unit] =
     fileTransfer(_.download(remotePath, localPath))(l)
 
   private def defaultListener = new LoggingTransferListener(LoggerFactory.DEFAULT)

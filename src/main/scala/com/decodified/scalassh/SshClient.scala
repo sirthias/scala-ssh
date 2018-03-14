@@ -26,7 +26,6 @@ import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
 import net.schmizz.sshj.userauth.method.AuthMethod
-import net.schmizz.sshj.xfer.scp.SCPFileTransfer
 
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -35,19 +34,19 @@ import scala.util.control.NonFatal
 final class SshClient(val config: HostConfig) extends ScpTransferable {
   lazy val log                 = LoggerFactory.getLogger(getClass)
   lazy val endpoint            = config.hostName + ':' + config.port
-  lazy val authenticatedClient = connect(client).right.flatMap(authenticate)
+  lazy val authenticatedClient = connect(client).flatMap(authenticate)
   val client                   = createClient(config)
 
-  def exec(command: Command): Validated[CommandResult] =
-    authenticatedClient.right.flatMap { client ⇒
-      startSession(client).right.flatMap { session ⇒
+  def exec(command: Command): Try[CommandResult] =
+    authenticatedClient.flatMap { client ⇒
+      startSession(client).flatMap { session ⇒
         execWithSession(command, session)
       }
     }
 
-  def execPTY(command: Command): Validated[CommandResult] =
-    authenticatedClient.right.flatMap { client ⇒
-      startSession(client).right.flatMap { session ⇒
+  def execPTY(command: Command): Try[CommandResult] =
+    authenticatedClient.flatMap { client ⇒
+      startSession(client).flatMap { session ⇒
         config.ptyConfig.fold(session.allocateDefaultPTY()) { ptyConf ⇒
           session.allocatePTY(ptyConf.term, ptyConf.cols, ptyConf.rows, ptyConf.width, ptyConf.height, ptyConf.modes)
         }
@@ -55,7 +54,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       }
     }
 
-  def execWithSession(command: Command, session: Session): Validated[CommandResult] = {
+  def execWithSession(command: Command, session: Session): Try[CommandResult] = {
     log.info("Executing SSH command on {}: \"{}\"", Seq(endpoint, command.command): _*)
     protect("Could not execute SSH command on") {
       val channel = session.exec(command.command)
@@ -68,15 +67,16 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
     }
   }
 
-  protected def createClient(config: HostConfig): SSHClient =
-    make(new SSHClient(config.sshjConfig)) { client ⇒
-      config.connectTimeout.foreach(client.setConnectTimeout)
-      config.connectionTimeout.foreach(client.setTimeout)
-      client.addHostKeyVerifier(config.hostKeyVerifier)
-      if (config.enableCompression) client.useCompression()
-    }
+  protected def createClient(config: HostConfig): SSHClient = {
+    val client = new SSHClient(config.sshjConfig)
+    config.connectTimeout.foreach(client.setConnectTimeout)
+    config.connectionTimeout.foreach(client.setTimeout)
+    client.addHostKeyVerifier(config.hostKeyVerifier)
+    if (config.enableCompression) client.useCompression()
+    client
+  }
 
-  protected def connect(client: SSHClient): Validated[SSHClient] = {
+  protected def connect(client: SSHClient): Try[SSHClient] = {
     require(!client.isConnected)
     protect("Could not connect to") {
       log.info("Connecting to {} ...", endpoint)
@@ -85,7 +85,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
     }
   }
 
-  protected def authenticate(client: SSHClient): Validated[SSHClient] = {
+  protected def authenticate(client: SSHClient): Try[SSHClient] = {
     def keyProviders(locations: List[String], passProducer: PasswordProducer): List[KeyProvider] = {
       def inputStream(location: String): Option[InputStream] = {
         if (location.startsWith("classpath:")) {
@@ -141,7 +141,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
     }
   }
 
-  protected def startSession(client: SSHClient): Validated[Session] = {
+  protected def startSession(client: SSHClient): Try[Session] = {
     require(client.isConnected && client.isAuthenticated)
     protect("Could not start SSH session on") {
       client.startSession()
@@ -153,12 +153,12 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
     client.close()
   }
 
-  protected def protect[T](errorMsg: ⇒ String)(f: ⇒ T): Validated[T] =
-    try Right(f)
-    catch { case NonFatal(e) ⇒ Left(s"$errorMsg $endpoint due to $e") }
+  protected def protect[T](errorMsg: ⇒ String)(f: ⇒ T): Try[T] =
+    try Success(f)
+    catch { case NonFatal(e) ⇒ Failure(SSH.Error(errorMsg + " " + endpoint, e)) }
 }
 
 object SshClient {
-  def apply(host: String, configProvider: HostConfigProvider = HostFileConfig()): Validated[SshClient] =
-    configProvider(host).right.map(new SshClient(_))
+  def apply(host: String, configProvider: HostConfigProvider = HostFileConfig()): Try[SshClient] =
+    configProvider(host).map(new SshClient(_))
 }
