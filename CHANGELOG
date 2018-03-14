@@ -1,3 +1,17 @@
+Version 0.9.0 (2018-03-14)
+--------------------------
+- Switch from `Either` to `Try` for all "error-enabled" types
+
+
+Version 0.8.0 (2018-03-13)
+--------------------------
+- Fixed connection hanging after upload/download
+- Upgraded to sshj 0.23.0 and slf4j 1.7.25
+- Cross-published against Scala 2.10, 2.11 and 2.12
+- Added agent login (PR by @laurentco from 2014)
+- Smaller fixes
+
+
 Version 0.7.0 (2014-10-15)
 --------------------------
 - Upgraded to sshj 0.10.0 and slf4j 1.7.7

@@ -8,19 +8,23 @@ It builds on SSHJ_ to provide the following features:
 * Convenient configuration of remote host properties via config file, resource or directly in code
 * Scala-idiomatic API
 
-.. image:: https://api.travis-ci.org/sirthias/scala-ssh.png?branch=master
-   :target: https://travis-ci.org/sirthias/scala-ssh
-   :alt: Build Status
+.. image:: https://img.shields.io/maven-central/v/com.decodified/scala-ssh_2.12.svg
+   :target: https://maven-badges.herokuapp.com/maven-central/com.decodified/scala-ssh_2.12
+   :alt: The latest scala-ssh artifacts on Maven Central
+
+.. image:: https://img.shields.io/badge/uses-badges-ff69b4.svg
+   :target: http://shields.io/
+   :alt: uses badges
 
 *****
 
 Installation
 ------------
 
-The latest release is **0.8.0** and is built against Scala 2.10, 2.11 and 2.12.
+The latest release is **0.9.0** and is built against Scala 2.10, 2.11 and 2.12.
 It is available from Maven Central. If you use SBT_ you can pull in the *scala-ssh* artifacts with::
 
-    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.8.0"
+    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.9.0"
 
 SSHJ_ uses SLF4J_ for logging, so you might want to also add logback_ to your dependencies::
 
@@ -33,9 +37,9 @@ Usage
 The highest-level API element provided by *scala-ssh* is the ``SSH`` object. You use it like this::
 
     SSH("example.com") { client =>
-      client.exec("ls -a").right.map { result =>
-        println("Result:\n" + result.stdOutAsString())
-      }
+      for {
+        result <- client.exec("ls -a")
+      } println("Result:\n" + result.stdOutAsString())
     }
 
 This establishes an SSH connection to host ``example.com`` and gives you an ``SshClient`` instance that you can use
