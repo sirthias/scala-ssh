@@ -24,11 +24,9 @@ scalacOptions ++= Seq(
   "-feature",
   "-language:_",
   "-unchecked",
-  "-Xfatal-warnings",
   "-Xlint:_,-missing-interpolator",
   "-Xfuture",
   "-Xsource:2.13", // new warning: deprecate assignments in argument position
-  "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-inaccessible",
   "-Ywarn-infer-any",
@@ -42,7 +40,7 @@ scalacOptions ++= Seq(
 scalacOptions := {
   val orig = scalacOptions.value
   CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 12)) ⇒
+    case Some((2, v)) if v >= 12 ⇒
       orig.map {
         case "-Ywarn-unused-import" ⇒ "-Ywarn-unused:imports,-patvars,-privates,-locals,-implicits,-explicits"
         case other                  ⇒ other
@@ -67,14 +65,14 @@ libraryDependencies ++= Seq(
   "com.jcraft"     % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
   "com.jcraft"     % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
   "ch.qos.logback" % "logback-classic"                   % "1.2.3" % "test",
-  "org.scalatest"  %% "scalatest"                        % "3.0.5" % "test"
+  "org.scalatest"  %% "scalatest"                        % "3.0.6-SNAP1" % "test"
 )
 
 ///////////////
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.10.6", "2.11.12", "2.12.4")
+crossScalaVersions := Seq("2.10.6", "2.11.12", "2.12.4", "2.13.0-M4")
 useGpg := true
 publishMavenStyle := true
 publishArtifact in Test := false
