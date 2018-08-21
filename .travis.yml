@@ -1,0 +1,11 @@
+language: scala
+jdk: oraclejdk8
+script:
+# TODO https://github.com/sirthias/scala-ssh/issues/38
+- sbt +test:compile
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/launchers"
+before_cache:
+- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
