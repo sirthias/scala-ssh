@@ -13,7 +13,7 @@ scmInfo := Some(ScmInfo(url("https://github.com/sirthias/scala-ssh"), "scm:git:g
 developers := List(
   Developer(id = "sirthias", name = "Mathias Doenitz", email = "", url = url("http://github.com/sirthias")))
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
 
 javacOptions ++= Seq("-encoding", "UTF-8", "-source", "1.7", "-target", "1.7", "-Xlint:unchecked", "-Xlint:deprecation")
 
@@ -72,7 +72,7 @@ libraryDependencies ++= Seq(
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.10.6", "2.11.12", "2.12.4", "2.13.0-M4")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6", "2.13.0-M4")
 useGpg := true
 publishMavenStyle := true
 publishArtifact in Test := false
