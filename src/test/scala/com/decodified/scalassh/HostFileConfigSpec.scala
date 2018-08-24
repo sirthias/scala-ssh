@@ -46,9 +46,9 @@ class HostFileConfigSpec extends FreeSpec with Matchers {
     }
 
     "error message if the file is missing" in {
-      config("non-existing.com") shouldEqual
+      config("non-existing.net") shouldEqual
       Failure(
-        SSH.Error("Host resources 'non-existing.com', 'com' not found, " +
+        SSH.Error("Host resources 'non-existing.net', 'net' not found, " +
           "either provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin"))
     }
 
