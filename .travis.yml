@@ -2,7 +2,7 @@ language: scala
 jdk: oraclejdk8
 script:
 # TODO https://github.com/sirthias/scala-ssh/issues/38
-- sbt +test:compile "testOnly com.decodified.scalassh.HostFileConfigSpec"
+- sbt +test:compile "+ testOnly com.decodified.scalassh.HostFileConfigSpec"
 cache:
   directories:
   - "$HOME/.ivy2/cache"
