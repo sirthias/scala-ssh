@@ -1,8 +1,15 @@
 language: scala
 jdk: oraclejdk8
-script:
-# TODO https://github.com/sirthias/scala-ssh/issues/38
-- sbt scalafmt::test test:scalafmt::test sbt:scalafmt::test +test:compile "+ testOnly com.decodified.scalassh.HostFileConfigSpec"
+matrix:
+  include:
+  - script:
+    # TODO https://github.com/sirthias/scala-ssh/issues/38
+    - sbt scalafmt::test test:scalafmt::test sbt:scalafmt::test +test:compile "+ testOnly com.decodified.scalassh.HostFileConfigSpec"
+  - scala: 2.13.0-M5
+    script:
+    - sbt
+      'set resolvers in ThisBuild += "staging" at "https://oss.sonatype.org/content/repositories/staging"'
+      "++ ${TRAVIS_SCALA_VERSION}!" compile
 cache:
   directories:
   - "$HOME/.ivy2/cache"

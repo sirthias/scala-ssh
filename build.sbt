@@ -28,13 +28,23 @@ scalacOptions ++= Seq(
   "-Xfuture",
   "-Xsource:2.13", // new warning: deprecate assignments in argument position
   "-Ywarn-dead-code",
-  "-Ywarn-inaccessible",
-  "-Ywarn-infer-any",
-  "-Ywarn-nullary-override",
-  "-Ywarn-nullary-unit",
   "-Ywarn-numeric-widen",
   "-Ywarn-unused-import"
 )
+
+scalacOptions ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, v)) if v <= 12 ⇒
+      Seq(
+        "-Ywarn-inaccessible",
+        "-Ywarn-infer-any",
+        "-Ywarn-nullary-override",
+        "-Ywarn-nullary-unit"
+      )
+    case _ ⇒
+      Nil
+  }
+}
 
 // WORKAROUND for https://github.com/scala/bug/issues/10270
 scalacOptions := {
@@ -64,9 +74,15 @@ libraryDependencies ++= Seq(
   "org.slf4j"      % "slf4j-api"                         % "1.7.25",
   "com.jcraft"     % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
   "com.jcraft"     % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
-  "ch.qos.logback" % "logback-classic"                   % "1.2.3" % "test",
-  "org.scalatest"  %% "scalatest"                        % "3.0.6-SNAP1" % "test"
+  "ch.qos.logback" % "logback-classic"                   % "1.2.3" % "test"
 )
+
+libraryDependencies ++= {
+  if (scalaVersion.value == "2.13.0-M5")
+    Nil
+  else
+    Seq("org.scalatest" %% "scalatest" % "3.0.6-SNAP1" % "test")
+}
 
 ///////////////
 // publishing
