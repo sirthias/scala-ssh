@@ -233,7 +233,7 @@ object HostKeyVerifiers {
     fromKnownHostsFile(new File(sshDir + "known_hosts")).recoverWith {
       case NonFatal(e1) ⇒
         fromKnownHostsFile(new File(sshDir + "known_hosts2")).recoverWith {
-          case NonFatal(e2) ⇒ Failure(SSH.Error(e1 + " and " + e2))
+          case NonFatal(e2) ⇒ Failure(SSH.Error(s"$e1 and $e2"))
         }
     }
   }
