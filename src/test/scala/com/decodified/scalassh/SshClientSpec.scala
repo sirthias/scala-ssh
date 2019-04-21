@@ -22,7 +22,7 @@ import java.io.FileWriter
 import org.scalatest.{FreeSpec, Matchers}
 
 import io.Source
-import Source.{fromFile ⇒ open}
+import Source.{fromFile => open}
 import scala.util.Success
 import scala.util.control.NonFatal
 
@@ -35,7 +35,7 @@ class SshClientSpec extends FreeSpec with Matchers {
     val fileName = HostFileConfig.DefaultHostFileDir + File.separator + ".testhost"
     try Source.fromFile(fileName).getLines().toList.head
     catch {
-      case NonFatal(e) ⇒
+      case NonFatal(e) =>
         fail(
           s"Could not find file '$fileName', you need to create it holding nothing but the name of the " +
             s"test host you would like to run your tests against!",
@@ -46,19 +46,19 @@ class SshClientSpec extends FreeSpec with Matchers {
   "The SshClient should be able to" - {
 
     "properly connect to the test host and fetch a directory listing" in {
-      SSH(testHostName) { client ⇒
-        client.exec("ls -a").map(result ⇒ result.stdOutAsString() + "|" + result.stdErrAsString())
+      SSH(testHostName) { client =>
+        client.exec("ls -a").map(result => result.stdOutAsString() + "|" + result.stdErrAsString())
       }.get should startWith(".\n..\n")
     }
 
     "properly connect to the test host and execute three independent commands" in {
-      SSH(testHostName) { client ⇒
+      SSH(testHostName) { client =>
         for {
-          res1 ← client.exec("ls")
+          res1 <- client.exec("ls")
           _ = println("OK 1")
-          res2 ← client.exec("dfssgsdg")
+          res2 <- client.exec("dfssgsdg")
           _ = println("OK 2")
-          res3 ← client.exec("uname")
+          res3 <- client.exec("uname")
           _ = println("OK 3")
         } yield (res1.exitCode, res2.exitCode, res3.exitCode)
       } shouldEqual Success((Some(0), Some(127), Some(0)))
@@ -71,19 +71,19 @@ class SshClientSpec extends FreeSpec with Matchers {
       writer.close()
 
       try {
-        SSH(testHostName) { client ⇒
+        SSH(testHostName) { client =>
           for {
-            _      ← client.upload(testFile.getAbsolutePath, testFileName)
-            result ← client.exec("cat " + testFileName)
+            _      <- client.upload(testFile.getAbsolutePath, testFileName)
+            result <- client.exec("cat " + testFileName)
           } yield result.stdOutAsString()
         } shouldEqual Success(testText)
       } finally testFile.delete()
     }
 
     "properly download from the test host" in {
-      SSH(testHostName) { client ⇒
+      SSH(testHostName) { client =>
         for {
-          _ ← client.download(testFileName, testFileName)
+          _ <- client.download(testFileName, testFileName)
         } yield {
           try open(testFileName).getLines.mkString
           finally new File(testFileName).delete()

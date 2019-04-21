@@ -28,7 +28,7 @@ final case class SimplePasswordProducer(password: String) extends PasswordProduc
 object PasswordProducer {
   implicit def fromString(password: String): SimplePasswordProducer = SimplePasswordProducer(password)
 
-  implicit def fromFunc(producer: String ⇒ String): PasswordProducer =
+  implicit def fromFunc(producer: String => String): PasswordProducer =
     new PasswordProducer {
       def reqPassword(resource: Resource[_]) = producer(resource.toString).toCharArray
       def shouldRetry(resource: Resource[_]) = false

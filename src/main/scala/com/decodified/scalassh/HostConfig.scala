@@ -30,7 +30,7 @@ import scala.util.control.NonFatal
 import scala.io.Source
 import HostKeyVerifiers._
 
-trait HostConfigProvider extends (String ⇒ Try[HostConfig])
+trait HostConfigProvider extends (String => Try[HostConfig])
 
 object HostConfigProvider {
   implicit def fromLogin(login: SshLogin): HostConfigProvider =
@@ -70,16 +70,17 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
 
   def apply(host: String): Try[HostConfig] =
     rawLines(host).flatMap {
-      case (source, lines) ⇒
+      case (source, lines) =>
         for {
-          settings          ← splitToMap(lines, source)
-          login             ← login(settings, source)
-          port              ← optIntSetting("port", settings, source)
-          connectTimeout    ← optIntSetting("connect-timeout", settings, source)
-          connectionTimeout ← optIntSetting("connection-timeout", settings, source)
-          commandTimeout    ← optIntSetting("command-timeout", settings, source)
-          enableCompression ← optBoolSetting("enable-compression", settings, source)
-          verifier          ← setting("fingerprint", settings, source).transform(x ⇒ Success(forFingerprint(x)), _ ⇒ KnownHosts)
+          settings          <- splitToMap(lines, source)
+          login             <- login(settings, source)
+          port              <- optIntSetting("port", settings, source)
+          connectTimeout    <- optIntSetting("connect-timeout", settings, source)
+          connectionTimeout <- optIntSetting("connection-timeout", settings, source)
+          commandTimeout    <- optIntSetting("command-timeout", settings, source)
+          enableCompression <- optBoolSetting("enable-compression", settings, source)
+          verifier <- setting("fingerprint", settings, source)
+            .transform(x => Success(forFingerprint(x)), _ => KnownHosts)
         } yield {
           HostConfig(
             login,
@@ -96,10 +97,10 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
 
   private def login(settings: Map[String, String], source: String): Try[SshLogin] =
     setting("login-type", settings, source).flatMap {
-      case "password" ⇒ passwordLogin(settings, source)
-      case "keyfile"  ⇒ keyfileLogin(settings, source)
-      case "agent"    ⇒ agentLogin(settings, source)
-      case x ⇒
+      case "password" => passwordLogin(settings, source)
+      case "keyfile"  => keyfileLogin(settings, source)
+      case "agent"    => agentLogin(settings, source)
+      case x =>
         Failure(
           SSH.Error(s"Illegal login-type setting '$x' in host config '$source': " +
             "expecting either 'password', 'keyfile' or 'agent'"))
@@ -107,12 +108,12 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
 
   private def passwordLogin(settings: Map[String, String], source: String): Try[PasswordLogin] =
     for {
-      user ← setting("username", settings, source)
-      pass ← setting("password", settings, source)
+      user <- setting("username", settings, source)
+      pass <- setting("password", settings, source)
     } yield PasswordLogin(user, pass)
 
   private def keyfileLogin(settings: Map[String, String], source: String): Try[PublicKeyLogin] =
-    for (user ← setting("username", settings, source)) yield {
+    for (user <- setting("username", settings, source)) yield {
       import PublicKeyLogin._
       val keyfile    = setting("keyfile", settings, source).toOption
       val passphrase = setting("passphrase", settings, source).toOption
@@ -121,8 +122,8 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
         passphrase.map(SimplePasswordProducer),
         keyfile
           .map {
-            case kf if kf.startsWith("+") ⇒ kf.tail :: DefaultKeyLocations
-            case kf                       ⇒ kf :: Nil
+            case kf if kf.startsWith("+") => kf.tail :: DefaultKeyLocations
+            case kf                       => kf :: Nil
           }
           .getOrElse(DefaultKeyLocations)
           .map(_.replaceFirst("^~/", System.getProperty("user.home") + '/').replace('/', File.separatorChar))
@@ -137,29 +138,29 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
 
   private def setting(key: String, settings: Map[String, String], source: String): Try[String] =
     settings.get(key) match {
-      case Some(user) ⇒ Success(user)
-      case None       ⇒ Failure(SSH.Error(s"Host config '$source' is missing required setting '$key'"))
+      case Some(user) => Success(user)
+      case None       => Failure(SSH.Error(s"Host config '$source' is missing required setting '$key'"))
     }
 
   private def optIntSetting(key: String, settings: Map[String, String], source: String): Try[Option[Int]] =
-    setting(key, settings, source).transform(x ⇒ Success(Some(x.toInt)), _ ⇒ Success(None))
+    setting(key, settings, source).transform(x => Success(Some(x.toInt)), _ => Success(None))
 
   private def optBoolSetting(key: String, settings: Map[String, String], source: String): Try[Option[Boolean]] =
     setting(key, settings, source) match {
-      case Success("yes" | "YES" | "true" | "TRUE") ⇒ Success(Some(true))
-      case Failure(_)                               ⇒ Success(None)
-      case Success(value) ⇒
+      case Success("yes" | "YES" | "true" | "TRUE") => Success(Some(true))
+      case Failure(_)                               => Success(None)
+      case Success(value) =>
         Failure(SSH.Error(s"Value '$value' for setting '$key' in host config '$source' is not a legal boolean"))
     }
 
   private def splitToMap(lines: TraversableOnce[String], source: String) =
     lines.foldLeft(Success(Map.empty): Try[Map[String, String]]) {
-      case (Success(map), line) if line.nonEmpty && line.charAt(0) != '#' ⇒
+      case (Success(map), line) if line.nonEmpty && line.charAt(0) != '#' =>
         line.indexOf('=') match {
-          case -1 ⇒ Failure(SSH.Error(s"Host config '$source' contains illegal line:\n$line"))
-          case ix ⇒ Success(map.updated(line.substring(0, ix).trim, line.substring(ix + 1).trim))
+          case -1 => Failure(SSH.Error(s"Host config '$source' contains illegal line:\n$line"))
+          case ix => Success(map.updated(line.substring(0, ix).trim, line.substring(ix + 1).trim))
         }
-      case (result, _) ⇒ result
+      case (result, _) => result
     }
 }
 
@@ -169,12 +170,12 @@ object HostFileConfig {
   def apply(hostFilesDir: String): HostConfigProvider =
     new FromStringsHostConfigProvider {
       protected def rawLines(host: String): Try[(String, TraversableOnce[String])] = {
-        val locations = searchLocations(host).map(name ⇒ new File(hostFilesDir + File.separator + name))
+        val locations = searchLocations(host).map(name => new File(hostFilesDir + File.separator + name))
         locations.find(_.exists) match {
-          case Some(file) ⇒
-            try Success(file.getAbsolutePath → Source.fromFile(file, "utf8").getLines())
-            catch { case e: IOException ⇒ Failure(SSH.Error(s"Could not read host file '$file' due to $e")) }
-          case None ⇒
+          case Some(file) =>
+            try Success(file.getAbsolutePath -> Source.fromFile(file, "utf8").getLines())
+            catch { case e: IOException => Failure(SSH.Error(s"Could not read host file '$file' due to $e")) }
+          case None =>
             Failure(
               SSH.Error(s"Host files '${locations.mkString("', '")}' not found, " +
                 "either provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin"))
@@ -202,18 +203,18 @@ object HostResourceConfig {
       protected def rawLines(host: String): Try[(String, TraversableOnce[String])] = {
         val locations = HostFileConfig.searchLocations(host).map(resourceBase + _)
         locations
-          .map { location ⇒
-            location → {
+          .map { location =>
+            location -> {
               val inputStream = getClass.getClassLoader.getResourceAsStream(location)
               if (inputStream ne null) {
                 try new StreamCopier().drainToString(inputStream).split("\n").toList.filter(_.nonEmpty)
-                catch { case NonFatal(_) ⇒ Nil }
+                catch { case NonFatal(_) => Nil }
               } else Nil
             }
           }
           .find(_._2.nonEmpty) match {
-          case Some(result) ⇒ Success(result)
-          case None ⇒
+          case Some(result) => Success(result)
+          case None =>
             Failure(
               SSH.Error(s"Host resources '${locations.mkString("', '")}' not found, " +
                 s"either provide one or use a concrete HostConfig, PasswordLogin, PublicKeyLogin or AgentLogin"))
@@ -231,9 +232,9 @@ object HostKeyVerifiers {
   lazy val KnownHosts: Try[HostKeyVerifier] = {
     val sshDir = System.getProperty("user.home") + File.separator + ".ssh" + File.separator
     fromKnownHostsFile(new File(sshDir + "known_hosts")).recoverWith {
-      case NonFatal(e1) ⇒
+      case NonFatal(e1) =>
         fromKnownHostsFile(new File(sshDir + "known_hosts2")).recoverWith {
-          case NonFatal(e2) ⇒ Failure(SSH.Error(s"$e1 and $e2"))
+          case NonFatal(e2) => Failure(SSH.Error(s"$e1 and $e2"))
         }
     }
   }
@@ -241,13 +242,13 @@ object HostKeyVerifiers {
   def fromKnownHostsFile(knownHostsFile: File): Try[HostKeyVerifier] =
     if (knownHostsFile.exists()) {
       try Success(new OpenSSHKnownHosts(knownHostsFile))
-      catch { case NonFatal(e) ⇒ Failure(SSH.Error(s"Could not read $knownHostsFile", e)) }
+      catch { case NonFatal(e) => Failure(SSH.Error(s"Could not read $knownHostsFile", e)) }
     } else Failure(SSH.Error(knownHostsFile.toString + " not found"))
 
   def forFingerprint(fingerprint: String): HostKeyVerifier =
     fingerprint match {
-      case "any" | "ANY" ⇒ DontVerify
-      case fp ⇒
+      case "any" | "ANY" => DontVerify
+      case fp =>
         new HostKeyVerifier {
           def verify(hostname: String, port: Int, key: PublicKey) = SecurityUtils.getFingerprint(key) == fp
         }

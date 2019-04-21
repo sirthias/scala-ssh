@@ -38,16 +38,16 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
   val client                   = createClient(config)
 
   def exec(command: Command): Try[CommandResult] =
-    authenticatedClient.flatMap { client ⇒
-      startSession(client).flatMap { session ⇒
+    authenticatedClient.flatMap { client =>
+      startSession(client).flatMap { session =>
         execWithSession(command, session)
       }
     }
 
   def execPTY(command: Command): Try[CommandResult] =
-    authenticatedClient.flatMap { client ⇒
-      startSession(client).flatMap { session ⇒
-        config.ptyConfig.fold(session.allocateDefaultPTY()) { ptyConf ⇒
+    authenticatedClient.flatMap { client =>
+      startSession(client).flatMap { session =>
+        config.ptyConfig.fold(session.allocateDefaultPTY()) { ptyConf =>
           session.allocatePTY(ptyConf.term, ptyConf.cols, ptyConf.rows, ptyConf.width, ptyConf.height, ptyConf.modes)
         }
         execWithSession(command, session)
@@ -60,8 +60,8 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       val channel = session.exec(command.command)
       command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
       command.timeout orElse config.commandTimeout match {
-        case Some(timeout) ⇒ channel.join(timeout.toLong, TimeUnit.MILLISECONDS)
-        case None          ⇒ channel.join()
+        case Some(timeout) => channel.join(timeout.toLong, TimeUnit.MILLISECONDS)
+        case None          => channel.join()
       }
       new CommandResult(channel)
     }
@@ -96,17 +96,17 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
                 "Classpath resource '" + resource + "' containing private key could not be found"))
         } else {
           try Some(new FileInputStream(location))
-          catch { case _: FileNotFoundException ⇒ None }
+          catch { case _: FileNotFoundException => None }
         }
       }
-      locations.flatMap { location ⇒
-        inputStream(location).map { stream ⇒
+      locations.flatMap { location =>
+        inputStream(location).map { stream =>
           val privateKey = Source.fromInputStream(stream).getLines().mkString("\n")
           client.loadKeys(privateKey, null, passProducer)
         }
       } match {
-        case Nil ⇒ sys.error("None of the configured keyfiles exists: " + locations.mkString(", "))
-        case x   ⇒ x
+        case Nil => sys.error("None of the configured keyfiles exists: " + locations.mkString(", "))
+        case x   => x
       }
     }
 
@@ -115,25 +115,25 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       val agentConnector: Try[Connector]                  = Try { ConnectorFactory.getDefault.createConnector() }
       val agentProxy: Try[AgentProxy]                     = agentConnector map (new AgentProxy(_))
       agentProxy map authMethods match {
-        case Success(m) ⇒ m
-        case Failure(e) ⇒ throw new RuntimeException("Agent proxy could not be initialized", e)
+        case Success(m) => m
+        case Failure(e) => throw new RuntimeException("Agent proxy could not be initialized", e)
       }
     }
 
     require(client.isConnected && !client.isAuthenticated)
     log.info("Authenticating to {} using {} ...", Seq(endpoint, config.login.user): _*)
     config.login match {
-      case PasswordLogin(user, passProducer) ⇒
+      case PasswordLogin(user, passProducer) =>
         protect("Could not authenticate (with password) to") {
           client.authPassword(user, passProducer)
           client
         }
-      case PublicKeyLogin(user, passProducer, keyfileLocations) ⇒
+      case PublicKeyLogin(user, passProducer, keyfileLocations) =>
         protect("Could not authenticate (with keyfile) to") {
           client.authPublickey(user, keyProviders(keyfileLocations, passProducer.orNull): _*)
           client
         }
-      case AgentLogin(user, _) ⇒
+      case AgentLogin(user, _) =>
         protect("Could not authenticate (with agent proxy) to") {
           client.auth(user, agentProxyAuthMethods: _*)
           client
@@ -153,9 +153,9 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
     client.close()
   }
 
-  protected def protect[T](errorMsg: ⇒ String)(f: ⇒ T): Try[T] =
+  protected def protect[T](errorMsg: => String)(f: => T): Try[T] =
     try Success(f)
-    catch { case NonFatal(e) ⇒ Failure(SSH.Error(errorMsg + " " + endpoint, e)) }
+    catch { case NonFatal(e) => Failure(SSH.Error(errorMsg + " " + endpoint, e)) }
 }
 
 object SshClient {

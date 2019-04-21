@@ -24,10 +24,10 @@ import net.schmizz.sshj.xfer.LoggingTransferListener
 import scala.util.Try
 
 abstract class ScpTransferable {
-  self: SshClient ⇒
+  self: SshClient =>
 
-  def sftp[T](fun: SFTPClient ⇒ T): Try[T] =
-    authenticatedClient.flatMap { client ⇒
+  def sftp[T](fun: SFTPClient => T): Try[T] =
+    authenticatedClient.flatMap { client =>
       protect("SFTP client failed") {
         val ftpClient = client.newSFTPClient()
         try fun(ftpClient)
@@ -35,8 +35,8 @@ abstract class ScpTransferable {
       }
     }
 
-  def fileTransfer[T](fun: SCPFileTransfer ⇒ T)(implicit l: TransferListener = defaultListener): Try[T] =
-    authenticatedClient.flatMap { client ⇒
+  def fileTransfer[T](fun: SCPFileTransfer => T)(implicit l: TransferListener = defaultListener): Try[T] =
+    authenticatedClient.flatMap { client =>
       protect("SCP file transfer failed") {
         val transfer = client.newSCPFileTransfer()
         transfer.setTransferListener(l)
