@@ -79,7 +79,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
   protected def connect(client: SSHClient): Try[SSHClient] = {
     require(!client.isConnected)
     protect("Could not connect to") {
-      log.info("Connecting to {} ...", endpoint)
+      log.info("Connecting to {} ...", endpoint: Any)
       client.connect(config.hostName, config.port)
       client
     }
@@ -149,7 +149,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
   }
 
   def close(): Unit = {
-    log.info("Closing connection to {} ...", endpoint)
+    log.info("Closing connection to {} ...", endpoint: Any)
     client.close()
   }
 

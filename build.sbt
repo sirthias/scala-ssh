@@ -13,7 +13,7 @@ scmInfo := Some(ScmInfo(url("https://github.com/sirthias/scala-ssh"), "scm:git:g
 developers := List(
   Developer(id = "sirthias", name = "Mathias Doenitz", email = "", url = url("http://github.com/sirthias")))
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.8"
 
 javacOptions ++= Seq("-encoding", "UTF-8", "-source", "1.7", "-target", "1.7", "-Xlint:unchecked", "-Xlint:deprecation")
 
@@ -25,7 +25,6 @@ scalacOptions ++= Seq(
   "-language:_",
   "-unchecked",
   "-Xlint:_,-missing-interpolator",
-  "-Xfuture",
   "-Xsource:2.13", // new warning: deprecate assignments in argument position
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
@@ -36,6 +35,7 @@ scalacOptions ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, v)) if v <= 12 ⇒
       Seq(
+        "-Xfuture",
         "-Ywarn-inaccessible",
         "-Ywarn-infer-any",
         "-Ywarn-nullary-override",
@@ -78,17 +78,14 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= {
-  if (scalaVersion.value == "2.13.0-M5")
-    Nil
-  else
-    Seq("org.scalatest" %% "scalatest" % "3.0.6-SNAP1" % "test")
+  Seq("org.scalatest" %% "scalatest" % "3.0.8-RC2" % "test")
 }
 
 ///////////////
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6", "2.13.0-M4")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0-RC1")
 useGpg := true
 publishMavenStyle := true
 publishArtifact in Test := false
