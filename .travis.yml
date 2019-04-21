@@ -1,10 +1,10 @@
 language: scala
-jdk: oraclejdk8
-matrix:
-  include:
-  - script:
-    # TODO https://github.com/sirthias/scala-ssh/issues/38
-    - sbt scalafmt::test test:scalafmt::test sbt:scalafmt::test +test:compile "+ testOnly com.decodified.scalassh.HostFileConfigSpec"
+jdk:
+- oraclejdk8
+- openjdk11
+script:
+# TODO https://github.com/sirthias/scala-ssh/issues/38
+- sbt scalafmt::test test:scalafmt::test sbt:scalafmt::test +test:compile "+ testOnly com.decodified.scalassh.HostFileConfigSpec"
 cache:
   directories:
   - "$HOME/.ivy2/cache"
