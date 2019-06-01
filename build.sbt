@@ -78,14 +78,14 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= {
-  Seq("org.scalatest" %% "scalatest" % "3.0.8-RC2" % "test")
+  Seq("org.scalatest" %% "scalatest" % "3.0.8-RC5" % "test")
 }
 
 ///////////////
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0-RC1")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0-RC3")
 useGpg := true
 publishMavenStyle := true
 publishArtifact in Test := false
