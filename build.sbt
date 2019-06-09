@@ -78,14 +78,17 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= {
-  Seq("org.scalatest" %% "scalatest" % "3.0.8-RC5" % "test")
+  if (scalaBinaryVersion.value == "2.13")
+    Seq("org.scalatest" % "scalatest_2.13.0-RC3" % "3.0.8-RC5" % "test")
+  else
+    Seq("org.scalatest" %% "scalatest" % "3.0.8-RC5" % "test")
 }
 
 ///////////////
 // publishing
 ///////////////
 
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0-RC3")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0")
 useGpg := true
 publishMavenStyle := true
 publishArtifact in Test := false
