@@ -2,6 +2,9 @@ language: scala
 jdk:
 - oraclejdk8
 - openjdk11
+scala:
+- 2.12.8
+- 2.13.0
 script:
 # TODO https://github.com/sirthias/scala-ssh/issues/38
 - sbt scalafmt::test test:scalafmt::test sbt:scalafmt::test +test:compile "+ testOnly com.decodified.scalassh.HostFileConfigSpec"
