@@ -26,7 +26,6 @@ import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider
 import net.schmizz.sshj.userauth.method.AuthMethod
-
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 import scala.util.control.NonFatal
@@ -53,9 +52,10 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
         execWithSession(command, session)
       }
     }
+  def logCmd(command: Command): String = if (command.safe) command.command else "Sensitive data, not logged"
 
   def execWithSession(command: Command, session: Session): Try[CommandResult] = {
-    log.info("Executing SSH command on {}: \"{}\"", Seq(endpoint, command.command): _*)
+    log.info("Executing SSH command on {}: \"{}\"", Seq(endpoint, logCmd(command)): _*)
     protect("Could not execute SSH command on") {
       val channel = session.exec(command.command)
       command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
@@ -155,7 +155,12 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
 
   protected def protect[T](errorMsg: => String)(f: => T): Try[T] =
     try Success(f)
-    catch { case NonFatal(e) => Failure(SSH.Error(errorMsg + " " + endpoint, e)) }
+    catch {
+      case NonFatal(e) =>
+        Failure(
+          SSH
+            .Error(errorMsg + " " + endpoint + " message: " + e.getMessage + e.getStackTrace.toList.map(_.toString), e))
+    }
 }
 
 object SshClient {

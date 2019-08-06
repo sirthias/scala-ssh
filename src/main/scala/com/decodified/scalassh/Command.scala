@@ -18,11 +18,25 @@ package com.decodified.scalassh
 
 import java.io.{ByteArrayInputStream, File, FileInputStream, InputStream}
 import net.schmizz.sshj.connection.channel.direct.Session
-
-final case class Command(command: String, input: CommandInput = CommandInput.NoInput, timeout: Option[Int] = None)
+trait Command {
+  val command: String
+  val input: CommandInput  = CommandInput.NoInput
+  val timeout: Option[Int] = None
+  val safe: Boolean
+}
+case class SafeCommand(command: String,
+                       override val input: CommandInput = CommandInput.NoInput,
+                       override val timeout: Option[Int] = None,
+                       safe: Boolean = true)
+    extends Command
+case class UnsafeCommand(command: String,
+                         override val input: CommandInput = CommandInput.NoInput,
+                         override val timeout: Option[Int] = None,
+                         safe: Boolean = false)
+    extends Command
 
 object Command {
-  implicit def fromString(cmd: String): Command = Command(cmd)
+  def apply(cmd: String, safe: Boolean): Command = if (safe) SafeCommand(cmd) else UnsafeCommand(cmd)
 }
 
 final case class CommandInput(inputStream: Option[InputStream])
