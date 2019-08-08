@@ -37,6 +37,7 @@ case class UnsafeCommand(command: String,
 
 object Command {
   def apply(cmd: String, safe: Boolean): Command = if (safe) SafeCommand(cmd) else UnsafeCommand(cmd)
+  def apply(cmd: String): Command                = SafeCommand(cmd)
 }
 
 final case class CommandInput(inputStream: Option[InputStream])

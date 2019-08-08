@@ -16,7 +16,7 @@
 
 package com.decodified.scalassh
 
-import scala.util.control.NonFatal
+import scala.util.control.{NoStackTrace, NonFatal}
 import scala.util.{Failure, Success, Try}
 
 object SSH {
@@ -37,5 +37,5 @@ object SSH {
     implicit def fromAny[T](value: T) = Result(Success(value))
   }
 
-  final case class Error(msg: String, cause: Throwable = null) extends RuntimeException(msg, cause)
+  final case class Error(msg: String, cause: Throwable = null) extends RuntimeException(msg, cause) with NoStackTrace
 }
