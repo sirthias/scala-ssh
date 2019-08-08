@@ -157,8 +157,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
     try Success(f)
     catch {
       case NonFatal(e) =>
-        Failure(
-          SSH.Error(s"$errorMsg executing on $endpoint - message: ${e.getMessage}", e))
+        Failure(SSH.Error(s"$errorMsg executing on $endpoint - message: ${e.getMessage}", e))
     }
 }
 
