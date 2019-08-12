@@ -35,7 +35,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
   lazy val endpoint            = config.hostName + ':' + config.port
   lazy val authenticatedClient = connect(client).flatMap(authenticate)
   val client                   = createClient(config)
-
+  val unsafeLogMsg             = "Sensitive data, not logged"
   def exec(command: Command): Try[CommandResult] =
     authenticatedClient.flatMap { client =>
       startSession(client).flatMap { session =>
@@ -52,10 +52,11 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
         execWithSession(command, session)
       }
     }
-  def logCmd(command: Command): String = if (command.safe) command.command else "Sensitive data, not logged"
 
   def execWithSession(command: Command, session: Session): Try[CommandResult] = {
-    log.info("Executing SSH command on {}: \"{}\"", Seq(endpoint, logCmd(command)): _*)
+    log.info(
+      "Executing SSH command on {}: \"{}\"",
+      Seq(endpoint, if (command.safeToLog) command.command else unsafeLogMsg): _*)
     protect("Could not execute SSH command on") {
       val channel = session.exec(command.command)
       command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
