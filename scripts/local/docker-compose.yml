@@ -1,0 +1,22 @@
+version: '2.4'
+
+services:
+  sbt:
+    image: hseeberger/scala-sbt:8u222_1.3.3_2.12.10
+    command: bash -c "/root/workdir/scripts/local/sbt-shell.sh"
+    ports:
+      - "5005:5005"
+    volumes:
+      - $HOME/.ivy2:/root/.ivy2:cached
+      - $HOME/.sbt:/root/.sbt:cached
+      - $HOME/.coursier:/root/.coursier:cached
+      - ../..:/root/workdir
+    working_dir: /root/workdir
+    links:
+      - sshd
+
+  sshd:
+    container_name: test_sshd
+    image: rastasheep/ubuntu-sshd:16.04
+    ports:
+      - 22
