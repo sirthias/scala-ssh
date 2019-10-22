@@ -18,6 +18,8 @@ It builds on SSHJ_ to provide the following features:
 
 *****
 
+
+
 Installation
 ------------
 
@@ -177,6 +179,20 @@ encounter exceptions like this:
             at net.schmizz.sshj.common.KeyType$3.readPubKeyFromBuffer(KeyType.java:144) ~[sshj-0.12.0.jar:na]
             ... 7 common frames omitted
 
+Running tests locally
+---------------------
+
+Some of the tests needs a running SSH daemon and expects particular structure of `~/.scala-ssh`. In case you want to run
+those tests locally there is prepared structure to run dockerized sbt and sshd. Running dockerized structure should
+work just by itself:
+
+```
+scripts/local/dockerized-sbt.sh
+# and then in sbt:
+test
+```
+
+Having sbt as a separate step make it easier to run changes iteratively in dockerized sbt.
 
 License
 -------

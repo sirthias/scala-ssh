@@ -1,0 +1,4 @@
+login-type  = keyfile
+username    = root
+keyfile     = /root/.ssh/id_ed25519
+
