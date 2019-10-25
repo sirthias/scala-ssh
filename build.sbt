@@ -70,7 +70,7 @@ scalafmtOnCompile := true
 scalafmtVersion := "1.4.0"
 
 libraryDependencies ++= Seq(
-  "com.hierynomus" % "sshj"                              % "0.26.0",
+  "com.hierynomus" % "sshj"                              % "0.27.0",
   "org.slf4j"      % "slf4j-api"                         % "1.7.25",
   "com.jcraft"     % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
   "com.jcraft"     % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
