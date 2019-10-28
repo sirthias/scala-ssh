@@ -1,14 +1,23 @@
 language: scala
+
 jdk:
 - openjdk8
 - openjdk11
+
 scala:
-- 2.12.8
-- 2.13.0
+- 2.12.10
+- 2.13.1
+
 script: bash scripts/ci/test.sh
+
+before_cache:
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+  - find $HOME/.sbt -name "*.lock" -type f -delete
+
 cache:
   directories:
-  - "$HOME/.ivy2/cache"
-  - "$HOME/.sbt/launchers"
-before_cache:
-- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+    - $HOME/.cache
+    - $HOME/.coursier
+    - $HOME/.ivy2
+    - $HOME/.m2
+    - $HOME/.sbt

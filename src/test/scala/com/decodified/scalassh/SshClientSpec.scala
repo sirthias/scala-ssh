@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 Mathias Doenitz
+ * Copyright 2011-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,15 @@ class SshClientSpec extends FreeSpec with Matchers {
 
   val testHostName = {
     val fileName = HostFileConfig.DefaultHostFileDir + File.separator + ".testhost"
-    try Source.fromFile(fileName).getLines().toList.head
+    val source   = Source.fromFile(fileName)
+    try source.getLines().toList.head
     catch {
       case NonFatal(e) =>
         fail(
           s"Could not find file '$fileName', you need to create it holding nothing but the name of the " +
             s"test host you would like to run your tests against!",
           e)
-    }
+    } finally source.close()
   }
 
   "The SshClient should be able to" - {

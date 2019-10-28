@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 Mathias Doenitz
+ * Copyright 2011-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,15 @@ object Command {
 final case class CommandInput(inputStream: Option[InputStream])
 
 object CommandInput {
-  val NoInput                                                          = CommandInput(None)
-  implicit def fromByteArray(input: Array[Byte])                       = CommandInput(Some(new ByteArrayInputStream(input)))
-  implicit def fromInputStream(input: InputStream)                     = CommandInput(Some(input))
-  implicit def fromString(input: String, charsetName: String = "UTF8") = fromByteArray(input getBytes charsetName)
-  implicit def fromFile(file: File)                                    = fromInputStream(new FileInputStream(file))
-  def fromFileName(file: String)                                       = fromFile(new File(file))
-  def fromResource(resource: String)                                   = fromInputStream(getClass.getClassLoader getResourceAsStream resource)
+  val NoInput                                                    = CommandInput(None)
+  implicit def fromByteArray(input: Array[Byte]): CommandInput   = CommandInput(Some(new ByteArrayInputStream(input)))
+  implicit def fromInputStream(input: InputStream): CommandInput = CommandInput(Some(input))
+
+  implicit def fromString(input: String, charsetName: String = "UTF8"): CommandInput =
+    fromByteArray(input getBytes charsetName)
+  implicit def fromFile(file: File): CommandInput = fromInputStream(new FileInputStream(file))
+  def fromFileName(file: String)                  = fromFile(new File(file))
+  def fromResource(resource: String)              = fromInputStream(getClass.getClassLoader getResourceAsStream resource)
 }
 
 final class CommandResult(val channel: Session.Command) {

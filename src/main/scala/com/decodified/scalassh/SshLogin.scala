@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 Mathias Doenitz
+ * Copyright 2011-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,13 @@ final case class PublicKeyLogin(user: String, passProducer: Option[PasswordProdu
 
 object PublicKeyLogin {
   val DefaultKeyLocations: List[String] = "~/.ssh/id_rsa" :: "~/.ssh/id_dsa" :: Nil
+
   def apply(user: String): PublicKeyLogin =
     apply(user, None, DefaultKeyLocations)
+
   def apply(user: String, keyfileLocations: String*): PublicKeyLogin =
     PublicKeyLogin(user, None, keyfileLocations.toList)
+
   def apply(user: String, passProducer: PasswordProducer, keyfileLocations: List[String]): PublicKeyLogin =
     PublicKeyLogin(user, Some(passProducer), keyfileLocations)
 }

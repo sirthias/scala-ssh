@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 Mathias Doenitz
+ * Copyright 2011-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,11 @@ object SSH {
   final case class Result[T](result: Try[T])
 
   object Result extends LowerPriorityImplicits {
-    implicit def fromTry[T](value: Try[T]) = Result(value)
+    implicit def fromTry[T](value: Try[T]): Result[T] = Result(value)
   }
-  private[SSH] abstract class LowerPriorityImplicits {
-    implicit def fromAny[T](value: T) = Result(Success(value))
+
+  abstract private[SSH] class LowerPriorityImplicits {
+    implicit def fromAny[T](value: T): Result[T] = Result(Success(value))
   }
 
   final case class Error(msg: String, cause: Throwable = null) extends RuntimeException(msg, cause) with NoStackTrace

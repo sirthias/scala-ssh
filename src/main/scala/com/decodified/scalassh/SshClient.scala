@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 Mathias Doenitz
+ * Copyright 2011-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       val channel = session.exec(command.command)
       command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
       command.timeout orElse config.commandTimeout match {
-        case Some(timeout) => channel.join(timeout.toLong, TimeUnit.MILLISECONDS)
+        case Some(timeout) => channel.join(timeout, TimeUnit.MILLISECONDS)
         case None          => channel.join()
       }
       new CommandResult(channel)
@@ -101,8 +101,11 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       }
       locations.flatMap { location =>
         inputStream(location).map { stream =>
-          val privateKey = Source.fromInputStream(stream).getLines().mkString("\n")
-          client.loadKeys(privateKey, null, passProducer)
+          val source = Source.fromInputStream(stream)
+          try {
+            val privateKey = source.getLines().mkString("\n")
+            client.loadKeys(privateKey, null, passProducer)
+          } finally source.close()
         }
       } match {
         case Nil => sys.error("None of the configured keyfiles exists: " + locations.mkString(", "))
@@ -111,7 +114,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
     }
 
     def agentProxyAuthMethods: Seq[AuthMethod] = {
-      def authMethods(agent: AgentProxy): Seq[AuthMethod] = agent.getIdentities.map(new AuthAgent(agent, _))
+      def authMethods(agent: AgentProxy): Seq[AuthMethod] = agent.getIdentities.toList.map(new AuthAgent(agent, _))
       val agentConnector: Try[Connector]                  = Try { ConnectorFactory.getDefault.createConnector() }
       val agentProxy: Try[AgentProxy]                     = agentConnector map (new AgentProxy(_))
       agentProxy map authMethods match {
@@ -159,6 +162,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
 }
 
 object SshClient {
+
   def apply(host: String, configProvider: HostConfigProvider = HostFileConfig()): Try[SshClient] =
     configProvider(host).map(new SshClient(_))
 }

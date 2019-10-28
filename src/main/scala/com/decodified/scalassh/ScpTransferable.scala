@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 Mathias Doenitz
+ * Copyright 2011-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package com.decodified.scalassh
 
-import net.schmizz.sshj.common.LoggerFactory
 import net.schmizz.sshj.sftp.SFTPClient
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer
-import net.schmizz.sshj.xfer.TransferListener
-import net.schmizz.sshj.xfer.LoggingTransferListener
+import net.schmizz.sshj.xfer.{LoggingTransferListener, TransferListener}
+
 import scala.util.Try
 
 abstract class ScpTransferable {
@@ -50,5 +49,5 @@ abstract class ScpTransferable {
   def download(remotePath: String, localPath: String)(implicit l: TransferListener = defaultListener): Try[Unit] =
     fileTransfer(_.download(remotePath, localPath))(l)
 
-  private def defaultListener = new LoggingTransferListener(LoggerFactory.DEFAULT)
+  private def defaultListener = new LoggingTransferListener
 }

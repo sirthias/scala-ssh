@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 Mathias Doenitz
+ * Copyright 2011-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,40 +33,40 @@ import HostKeyVerifiers._
 trait HostConfigProvider extends (String => Try[HostConfig])
 
 object HostConfigProvider {
+
   implicit def fromLogin(login: SshLogin): HostConfigProvider =
-    new HostConfigProvider {
-      def apply(host: String) = Success(HostConfig(login = login, hostName = host))
-    }
+    (host: String) => Success(HostConfig(login = login, hostName = host))
+
   implicit def fromHostConfig(config: HostConfig): HostConfigProvider =
-    new HostConfigProvider {
-      def apply(host: String) = Success(if (config.hostName.isEmpty) config.copy(hostName = host) else config)
-    }
+    (host: String) => Success(if (config.hostName.isEmpty) config.copy(hostName = host) else config)
 }
 
-final case class HostConfig(login: SshLogin,
-                            hostName: String = "",
-                            port: Int = 22,
-                            connectTimeout: Option[Int] = None,
-                            connectionTimeout: Option[Int] = None,
-                            commandTimeout: Option[Int] = None,
-                            enableCompression: Boolean = false,
-                            hostKeyVerifier: HostKeyVerifier = KnownHosts.toOption getOrElse DontVerify,
-                            ptyConfig: Option[PTYConfig] = None,
-                            sshjConfig: Config = HostConfig.DefaultSshjConfig)
+final case class HostConfig(
+    login: SshLogin,
+    hostName: String = "",
+    port: Int = 22,
+    connectTimeout: Option[Int] = None,
+    connectionTimeout: Option[Int] = None,
+    commandTimeout: Option[Int] = None,
+    enableCompression: Boolean = false,
+    hostKeyVerifier: HostKeyVerifier = KnownHosts.toOption getOrElse DontVerify,
+    ptyConfig: Option[PTYConfig] = None,
+    sshjConfig: Config = HostConfig.DefaultSshjConfig)
 
-final case class PTYConfig(term: String,
-                           cols: Int,
-                           rows: Int,
-                           width: Int,
-                           height: Int,
-                           modes: java.util.Map[PTYMode, Integer])
+final case class PTYConfig(
+    term: String,
+    cols: Int,
+    rows: Int,
+    width: Int,
+    height: Int,
+    modes: java.util.Map[PTYMode, Integer])
 
 object HostConfig {
   val DefaultSshjConfig = new DefaultConfig
 }
 
 sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
-  protected def rawLines(host: String): Try[(String, TraversableOnce[String])]
+  protected def rawLines(host: String): Try[(String, List[String])]
 
   def apply(host: String): Try[HostConfig] =
     rawLines(host).flatMap {
@@ -153,8 +153,8 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
         Failure(SSH.Error(s"Value '$value' for setting '$key' in host config '$source' is not a legal boolean"))
     }
 
-  private def splitToMap(lines: TraversableOnce[String], source: String) =
-    lines.foldLeft(Success(Map.empty): Try[Map[String, String]]) {
+  private def splitToMap(lines: List[String], source: String) =
+    lines.iterator.foldLeft(Success(Map.empty): Try[Map[String, String]]) {
       case (Success(map), line) if line.nonEmpty && line.charAt(0) != '#' =>
         line.indexOf('=') match {
           case -1 => Failure(SSH.Error(s"Host config '$source' contains illegal line:\n$line"))
@@ -167,14 +167,19 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
 object HostFileConfig {
   lazy val DefaultHostFileDir     = System.getProperty("user.home") + File.separator + ".scala-ssh"
   def apply(): HostConfigProvider = apply(DefaultHostFileDir)
+
   def apply(hostFilesDir: String): HostConfigProvider =
     new FromStringsHostConfigProvider {
-      protected def rawLines(host: String): Try[(String, TraversableOnce[String])] = {
+
+      protected def rawLines(host: String): Try[(String, List[String])] = {
         val locations = searchLocations(host).map(name => new File(hostFilesDir + File.separator + name))
         locations.find(_.exists) match {
           case Some(file) =>
-            try Success(file.getAbsolutePath -> Source.fromFile(file, "utf8").getLines())
-            catch { case e: IOException => Failure(SSH.Error(s"Could not read host file '$file' due to $e")) }
+            val lines = Source.fromFile(file, "utf8")
+            try Success(file.getAbsolutePath -> lines.getLines().toList)
+            catch {
+              case e: IOException => Failure(SSH.Error(s"Could not read host file '$file' due to $e"))
+            } finally lines.close()
           case None =>
             Failure(
               SSH.Error(s"Host files '${locations.mkString("', '")}' not found, " +
@@ -183,25 +188,27 @@ object HostFileConfig {
       }
     }
 
-  def searchLocations(name: String): Stream[String] =
+  def searchLocations(name: String): Iterator[String] =
     if (name.nonEmpty) {
-      name #:: {
+      Iterator.single(name) ++ {
         val dotIx                           = name.indexOf('.')
         @tailrec def findDigit(i: Int): Int = if (i < 0 || name.charAt(i).isDigit) i else findDigit(i - 1)
         val digitIx                         = findDigit(if (dotIx > 0) dotIx - 1 else name.length - 1)
         if (digitIx >= 0 && digitIx < dotIx) searchLocations(name.updated(digitIx, 'X'))
         else if (dotIx > 0) searchLocations(name.substring(dotIx + 1))
-        else Stream.empty
+        else Iterator.empty
       }
-    } else Stream.empty
+    } else Iterator.empty
 }
 
 object HostResourceConfig {
   def apply(): HostConfigProvider = apply("")
+
   def apply(resourceBase: String): HostConfigProvider =
     new FromStringsHostConfigProvider {
-      protected def rawLines(host: String): Try[(String, TraversableOnce[String])] = {
-        val locations = HostFileConfig.searchLocations(host).map(resourceBase + _)
+
+      protected def rawLines(host: String): Try[(String, List[String])] = {
+        val locations = HostFileConfig.searchLocations(host).map(resourceBase + _).toList
         locations
           .map { location =>
             location -> {
@@ -224,10 +231,8 @@ object HostResourceConfig {
 }
 
 object HostKeyVerifiers {
-  lazy val DontVerify: HostKeyVerifier =
-    new HostKeyVerifier {
-      def verify(hostname: String, port: Int, key: PublicKey) = true
-    }
+
+  lazy val DontVerify: HostKeyVerifier = (hostname: String, port: Int, key: PublicKey) => true
 
   lazy val KnownHosts: Try[HostKeyVerifier] = {
     val sshDir = System.getProperty("user.home") + File.separator + ".ssh" + File.separator
@@ -248,9 +253,6 @@ object HostKeyVerifiers {
   def forFingerprint(fingerprint: String): HostKeyVerifier =
     fingerprint match {
       case "any" | "ANY" => DontVerify
-      case fp =>
-        new HostKeyVerifier {
-          def verify(hostname: String, port: Int, key: PublicKey) = SecurityUtils.getFingerprint(key) == fp
-        }
+      case fp            => (hostname: String, port: Int, key: PublicKey) => SecurityUtils.getFingerprint(key) == fp
     }
 }
