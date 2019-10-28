@@ -12,6 +12,9 @@ It builds on SSHJ_ to provide the following features:
    :target: https://maven-badges.herokuapp.com/maven-central/com.decodified/scala-ssh_2.12
    :alt: The latest scala-ssh artifacts on Maven Central
 
+.. image:: https://travis-ci.org/sirthias/scala-ssh.svg?branch=master
+   :target: https://travis-ci.org/sirthias/scala-ssh
+
 .. image:: https://img.shields.io/badge/uses-badges-ff69b4.svg
    :target: http://shields.io/
    :alt: uses badges
