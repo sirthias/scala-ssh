@@ -25,7 +25,8 @@ object SSH {
       body: SshClient => Result[T]): Try[T] =
     SshClient(host, configProvider).flatMap { client =>
       try body(client).result
-      catch { case NonFatal(e) => Failure(e) } finally client.close()
+      catch { case NonFatal(e) => Failure(e) }
+      finally client.close()
     }
 
   final case class Result[T](result: Try[T])

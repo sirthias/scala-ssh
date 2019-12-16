@@ -16,17 +16,17 @@
 
 package com.decodified.scalassh
 
-import java.io.File
-import java.io.FileWriter
+import java.io.{File, FileWriter}
 
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-import io.Source
-import Source.{fromFile => open}
+import scala.io.Source
+import scala.io.Source.{fromFile => open}
 import scala.util.Success
 import scala.util.control.NonFatal
 
-class SshClientSpec extends FreeSpec with Matchers {
+class SshClientSpec extends AnyFreeSpec with Matchers {
 
   val testFileName = "testUpload.txt"
   val testText     = "Hello, Scala SSH!"

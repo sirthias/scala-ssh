@@ -60,11 +60,11 @@ fork in Test := true
 
 libraryDependencies ++= Seq(
   "com.hierynomus" % "sshj"                              % "0.27.0",
-  "org.slf4j"      % "slf4j-api"                         % "1.7.28",
+  "org.slf4j"      % "slf4j-api"                         % "1.7.29",
   "com.jcraft"     % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
   "com.jcraft"     % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
   "ch.qos.logback" % "logback-classic"                   % "1.2.3" % "test",
-  "org.scalatest"  %% "scalatest"                        % "3.0.8" % "test"
+  "org.scalatest"  %% "scalatest"                        % "3.1.0" % "test"
 )
 
 // publishing

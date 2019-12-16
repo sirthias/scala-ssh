@@ -16,11 +16,12 @@
 
 package com.decodified.scalassh
 
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.freespec.AnyFreeSpec
 
 import scala.util.{Failure, Success}
 
-class HostFileConfigSpec extends FreeSpec with Matchers {
+class HostFileConfigSpec extends AnyFreeSpec with Matchers {
 
   val config = HostResourceConfig()
 
