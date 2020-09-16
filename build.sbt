@@ -13,8 +13,8 @@ scmInfo := Some(ScmInfo(url("https://github.com/sirthias/scala-ssh"), "scm:git:g
 developers := List(
   Developer(id = "sirthias", name = "Mathias Doenitz", email = "", url = url("http://github.com/sirthias")))
 
-scalaVersion := "2.13.1"
-crossScalaVersions := Seq("2.12.10", "2.13.1")
+scalaVersion := "2.13.3"
+crossScalaVersions := Seq("2.12.12", "2.13.3")
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -59,12 +59,12 @@ scalafmtOnCompile := true
 fork in Test := true
 
 libraryDependencies ++= Seq(
-  "com.hierynomus" % "sshj"                              % "0.27.0",
-  "org.slf4j"      % "slf4j-api"                         % "1.7.29",
+  "com.hierynomus" % "sshj"                              % "0.30.0",
+  "org.slf4j"      % "slf4j-api"                         % "1.7.30",
   "com.jcraft"     % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
   "com.jcraft"     % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
   "ch.qos.logback" % "logback-classic"                   % "1.2.3" % "test",
-  "org.scalatest"  %% "scalatest"                        % "3.1.0" % "test"
+  "org.scalatest"  %% "scalatest"                        % "3.2.2" % "test"
 )
 
 // publishing

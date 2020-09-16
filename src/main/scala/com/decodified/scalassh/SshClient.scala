@@ -60,7 +60,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
       val channel = session.exec(command.command)
       command.input.inputStream.foreach(new StreamCopier().copy(_, channel.getOutputStream))
       command.timeout orElse config.commandTimeout match {
-        case Some(timeout) => channel.join(timeout, TimeUnit.MILLISECONDS)
+        case Some(timeout) => channel.join(timeout.toLong, TimeUnit.MILLISECONDS)
         case None          => channel.join()
       }
       new CommandResult(channel)

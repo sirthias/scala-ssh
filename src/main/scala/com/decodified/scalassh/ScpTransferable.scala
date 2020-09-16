@@ -16,6 +16,7 @@
 
 package com.decodified.scalassh
 
+import net.schmizz.sshj.common.LoggerFactory
 import net.schmizz.sshj.sftp.SFTPClient
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer
 import net.schmizz.sshj.xfer.{LoggingTransferListener, TransferListener}
@@ -49,5 +50,5 @@ abstract class ScpTransferable {
   def download(remotePath: String, localPath: String)(implicit l: TransferListener = defaultListener): Try[Unit] =
     fileTransfer(_.download(remotePath, localPath))(l)
 
-  private def defaultListener = new LoggingTransferListener
+  private def defaultListener = new LoggingTransferListener(LoggerFactory.DEFAULT)
 }

@@ -86,7 +86,7 @@ class SshClientSpec extends AnyFreeSpec with Matchers {
         for {
           _ <- client.download(testFileName, testFileName)
         } yield {
-          try open(testFileName).getLines.mkString
+          try open(testFileName).getLines().mkString
           finally new File(testFileName).delete()
         }
       } shouldEqual Success(testText)
