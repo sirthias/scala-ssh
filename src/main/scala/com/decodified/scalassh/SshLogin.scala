@@ -26,7 +26,7 @@ final case class PublicKeyLogin(user: String, passProducer: Option[PasswordProdu
     extends SshLogin
 
 object PublicKeyLogin {
-  val DefaultKeyLocations: List[String] = "~/.ssh/id_rsa" :: "~/.ssh/id_dsa" :: Nil
+  val DefaultKeyLocations: List[String] = "~/.ssh/id_ed25519" :: "~/.ssh/id_dsa" :: "~/.ssh/id_dsa" :: Nil
 
   def apply(user: String): PublicKeyLogin =
     apply(user, None, DefaultKeyLocations)
