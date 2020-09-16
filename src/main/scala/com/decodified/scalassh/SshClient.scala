@@ -115,7 +115,7 @@ final class SshClient(val config: HostConfig) extends ScpTransferable {
 
     def agentProxyAuthMethods: Seq[AuthMethod] = {
       def authMethods(agent: AgentProxy): Seq[AuthMethod] = agent.getIdentities.toList.map(new AuthAgent(agent, _))
-      val agentConnector: Try[Connector]                  = Try { ConnectorFactory.getDefault.createConnector() }
+      val agentConnector: Try[Connector]                  = Try(ConnectorFactory.getDefault.createConnector())
       val agentProxy: Try[AgentProxy]                     = agentConnector map (new AgentProxy(_))
       agentProxy map authMethods match {
         case Success(m) => m
