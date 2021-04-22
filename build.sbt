@@ -14,41 +14,54 @@ developers := List(
   Developer(id = "sirthias", name = "Mathias Doenitz", email = "", url = url("http://github.com/sirthias")))
 
 scalaVersion := "2.13.3"
-crossScalaVersions := Seq("2.12.12", "2.13.3")
+crossScalaVersions := Seq("2.12.12", "2.13.3", "3.0.0-RC3")
 
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-encoding", "UTF-8",
-  "-feature",
-  "-language:_",
-  "-unchecked",
-  "-target:jvm-1.8",
-  "-Xlint:_,-missing-interpolator",
-  "-Xfatal-warnings",
-  "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen",
-  "-Ybackend-parallelism", "8",
-  "-Ywarn-unused:imports,-patvars,-privates,-locals,-implicits,-explicits",
-  "-Ycache-macro-class-loader:last-modified",
-)
+scalacOptions ++=
+  Seq(
+    "-deprecation",
+    "-encoding",
+    "UTF-8",
+    "-feature",
+    "-language:_",
+    "-unchecked",
+    "-Xfatal-warnings"
+  )
 
 scalacOptions ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 12)) => Seq(
-      "-Yno-adapted-args",
-      "-Ywarn-inaccessible",
-      "-Ywarn-infer-any",
-      "-Ywarn-nullary-override",
-      "-Ywarn-nullary-unit",
-      "-Xfuture",
-      "-Xsource:2.13",
-    )
-    case Some((2, 13)) => Nil
-    case x => sys.error(s"unsupported scala version: $x")
+    case Some((2, _)) =>
+      Seq(
+        "-target:jvm-1.8",
+        "-Xlint:_,-missing-interpolator",
+        "-Ywarn-dead-code",
+        "-Ywarn-numeric-widen",
+        "-Ybackend-parallelism", "8",
+        "-Ywarn-unused:imports,-patvars,-privates,-locals,-implicits,-explicits",
+        "-Ycache-macro-class-loader:last-modified",
+      )
+    case Some((3, _)) => Seq("-source:3.0-migration", "-language:implicitConversions")
+    case x            => sys.error(s"unsupported scala version: $x")
   }
 }
 
-scalacOptions in (Compile, console) ~= (_ filterNot(o => o.contains("warn") || o.contains("Xlint")))
+scalacOptions ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 12)) =>
+      Seq(
+        "-Yno-adapted-args",
+        "-Ywarn-inaccessible",
+        "-Ywarn-infer-any",
+        "-Ywarn-nullary-override",
+        "-Ywarn-nullary-unit",
+        "-Xfuture",
+        "-Xsource:2.13",
+      )
+    case Some((2, 13) | (3, _)) => Nil
+    case x                      => sys.error(s"unsupported scala version: $x")
+  }
+}
+
+scalacOptions in (Compile, console) ~= (_ filterNot (o => o.contains("warn") || o.contains("Xlint")))
 scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value
 scalacOptions in (Compile, doc) += "-no-link-warnings"
 sourcesInBase := false
@@ -64,7 +77,7 @@ libraryDependencies ++= Seq(
   "com.jcraft"     % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
   "com.jcraft"     % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
   "ch.qos.logback" % "logback-classic"                   % "1.2.3" % "test",
-  "org.scalatest"  %% "scalatest"                        % "3.2.2" % "test"
+  "org.scalatest" %% "scalatest"                         % "3.2.8" % "test"
 )
 
 // publishing
