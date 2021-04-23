@@ -119,7 +119,7 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
       val passphrase = setting("passphrase", settings, source).toOption
       PublicKeyLogin(
         user,
-        passphrase.map(SimplePasswordProducer),
+        passphrase.map(SimplePasswordProducer.apply),
         keyfile
           .map {
             case kf if kf.startsWith("+") => kf.tail :: DefaultKeyLocations
