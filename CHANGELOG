@@ -1,3 +1,10 @@
+Version 0.11.0 (2021-05-04)
+---------------------------
+- Added `~/.ssh/id_ed25519` to default keyfile locations
+- Upgrade to latest versions of all dependencies
+- Cross-published against Scala 2.12, 2.13 and 3.0.0-RC3
+
+
 Version 0.10.0 (2019-10-28)
 ---------------------------
 - Upgrade to latest versions of all dependencies

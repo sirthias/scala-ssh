@@ -24,10 +24,10 @@ It builds on SSHJ_ to provide the following features:
 Installation
 ------------
 
-The latest release is **0.10.0** and is built against Scala 2.12 and 2.13.
+The latest release is **0.10.0** and is built against Scala 2.12, 2.13 and 3.0.0-RC3.
 It is available from Maven Central. If you use SBT_ you can pull in the *scala-ssh* artifacts with::
 
-    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.10.0"
+    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.11.0"
 
 SSHJ_ uses SLF4J_ for logging, so you might want to also add logback_ to your dependencies::
 
@@ -121,9 +121,11 @@ password
 
 keyfile
   optionally specifies the location of the user keyfile to use with login-type ``keyfile``,
-  if not given the default files ``~/.ssh/id_rsa`` and ``~/.ssh/id_dsa`` are tried, ignored for login-type ``password``,
-  if the filename starts with a ``+`` the file is searched in addition to the default locations, if the filename starts
-  with ``classpath:`` it is interpreted as the name of a classpath resource holding the private key
+  if not given the default files ``~/.ssh/id_ed25519``, ``~/.ssh/id_rsa`` and ``~/.ssh/id_dsa`` are tried,
+  if the filename starts with a ``+`` the file is searched in addition to the default
+  locations, if the filename starts with ``classpath:`` it is interpreted as the name of a classpath resource holding
+  the private key,
+  ignored for login-type ``password``
 
 passphrase
   optionally specifies the passphrase for the keyfile, if not given the keyfile is assumed to be unencrypted,
