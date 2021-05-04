@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 Mathias Doenitz
+ * Copyright 2011-2021 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,30 +69,29 @@ sealed abstract class FromStringsHostConfigProvider extends HostConfigProvider {
   protected def rawLines(host: String): Try[(String, List[String])]
 
   def apply(host: String): Try[HostConfig] =
-    rawLines(host).flatMap {
-      case (source, lines) =>
-        for {
-          settings          <- splitToMap(lines, source)
-          login             <- login(settings, source)
-          port              <- optIntSetting("port", settings, source)
-          connectTimeout    <- optIntSetting("connect-timeout", settings, source)
-          connectionTimeout <- optIntSetting("connection-timeout", settings, source)
-          commandTimeout    <- optIntSetting("command-timeout", settings, source)
-          enableCompression <- optBoolSetting("enable-compression", settings, source)
-          verifier <- setting("fingerprint", settings, source)
-            .transform(x => Success(forFingerprint(x)), _ => KnownHosts)
-        } yield {
-          HostConfig(
-            login,
-            hostName = setting("host-name", settings, source).toOption getOrElse host,
-            port = port getOrElse 22,
-            connectTimeout = connectTimeout,
-            connectionTimeout = connectionTimeout,
-            commandTimeout = commandTimeout,
-            enableCompression = enableCompression getOrElse false,
-            hostKeyVerifier = verifier
-          )
-        }
+    rawLines(host).flatMap { case (source, lines) =>
+      for {
+        settings          <- splitToMap(lines, source)
+        login             <- login(settings, source)
+        port              <- optIntSetting("port", settings, source)
+        connectTimeout    <- optIntSetting("connect-timeout", settings, source)
+        connectionTimeout <- optIntSetting("connection-timeout", settings, source)
+        commandTimeout    <- optIntSetting("command-timeout", settings, source)
+        enableCompression <- optBoolSetting("enable-compression", settings, source)
+        verifier <- setting("fingerprint", settings, source)
+          .transform(x => Success(forFingerprint(x)), _ => KnownHosts)
+      } yield {
+        HostConfig(
+          login,
+          hostName = setting("host-name", settings, source).toOption getOrElse host,
+          port = port getOrElse 22,
+          connectTimeout = connectTimeout,
+          connectionTimeout = connectionTimeout,
+          commandTimeout = commandTimeout,
+          enableCompression = enableCompression getOrElse false,
+          hostKeyVerifier = verifier
+        )
+      }
     }
 
   private def login(settings: Map[String, String], source: String): Try[SshLogin] =
@@ -236,11 +235,10 @@ object HostKeyVerifiers {
 
   lazy val KnownHosts: Try[HostKeyVerifier] = {
     val sshDir = System.getProperty("user.home") + File.separator + ".ssh" + File.separator
-    fromKnownHostsFile(new File(sshDir + "known_hosts")).recoverWith {
-      case NonFatal(e1) =>
-        fromKnownHostsFile(new File(sshDir + "known_hosts2")).recoverWith {
-          case NonFatal(e2) => Failure(SSH.Error(s"$e1 and $e2"))
-        }
+    fromKnownHostsFile(new File(sshDir + "known_hosts")).recoverWith { case NonFatal(e1) =>
+      fromKnownHostsFile(new File(sshDir + "known_hosts2")).recoverWith { case NonFatal(e2) =>
+        Failure(SSH.Error(s"$e1 and $e2"))
+      }
     }
   }
 
