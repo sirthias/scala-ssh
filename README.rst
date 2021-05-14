@@ -24,10 +24,10 @@ It builds on SSHJ_ to provide the following features:
 Installation
 ------------
 
-The latest release is **0.11.0** and is built against Scala 2.12, 2.13 and 3.
+The latest release is **0.11.1** and is built against Scala 2.12, 2.13 and 3.
 It is available from Maven Central. If you use SBT_ you can pull in the *scala-ssh* artifacts with::
 
-    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.11.0"
+    libraryDependencies += "com.decodified" %% "scala-ssh" % "0.11.1"
 
 SSHJ_ uses SLF4J_ for logging, so you might want to also add logback_ to your dependencies::
 
