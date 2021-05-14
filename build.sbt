@@ -14,7 +14,7 @@ developers := List(
   Developer(id = "sirthias", name = "Mathias Doenitz", email = "", url = url("http://github.com/sirthias")))
 
 scalaVersion := "2.13.5"
-crossScalaVersions := Seq("2.12.12", "2.13.5", "3.0.0-RC3")
+crossScalaVersions := Seq("2.12.12", "2.13.5", "3.0.0")
 
 scalacOptions ++=
   Seq(
@@ -77,7 +77,7 @@ libraryDependencies ++= Seq(
   "com.jcraft"     % "jsch.agentproxy.sshj"              % "0.0.9" % "provided",
   "com.jcraft"     % "jsch.agentproxy.connector-factory" % "0.0.9" % "provided",
   "ch.qos.logback" % "logback-classic"                   % "1.2.3" % "test",
-  "org.scalatest" %% "scalatest"                         % "3.2.8" % "test"
+  "org.scalatest" %% "scalatest"                         % "3.2.9" % "test"
 )
 
 // publishing
