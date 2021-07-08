@@ -153,7 +153,7 @@ fingerprint
   ``~/.ssh/known_hosts2`` files will be searched for a matching entry, fingerprint verification can be entirely disabled
   by setting ``fingerprint = any``
 
-Troubleshoting
+Troubleshooting
 --------------
 
 Java Cryptography Extension Policy Files
